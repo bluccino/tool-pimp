@@ -9,4 +9,7 @@ bash ../bin/pimp --install pimp
 bash ../bin/pimp --install ../bin/pimp
 bash ../bin/pimp --install ../bin/pimp
 bash ../bin/pimp --install ../bin/pimp
+ls deps/bin/pimp
+rm -f deps/bin/pimp
 bash ../bin/pimp --install ../bin/pimp deps/bin
+ls deps/bin/pimp
