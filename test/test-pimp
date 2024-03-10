@@ -94,6 +94,7 @@ $TEST --claim --path option working
 #===============================================================================
 
    $TEST $PIMP --path .git
+   $TEST $PIMP --path .pimp
 
 #===============================================================================
 $TEST --claim fail in case of missing arguments for --install
