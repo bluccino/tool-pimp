@@ -1,0 +1,12 @@
+ls deps/bin
+bash ../bin/pimp -?
+bash ../bin/pimp --?
+bash ../bin/pimp --help
+bash ../bin/pimp --version
+bash ../bin/pimp --v
+bash ../bin/pimp --install
+bash ../bin/pimp --install pimp
+bash ../bin/pimp --install ../bin/pimp
+bash ../bin/pimp --install ../bin/pimp
+bash ../bin/pimp --install ../bin/pimp
+bash ../bin/pimp --install ../bin/pimp deps/bin

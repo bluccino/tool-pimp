@@ -3,8 +3,8 @@
 # Copyright (c) 2024 Bluenetics GmbH
 # SPDX-License-Identifier: Apache-2.0
 
-rm -rf deps
-TEST="bash test-pimp"
+   PIMP=../bin/pimp
+   TEST="bash test-pimp"
 
 #===============================================================================
 # test-install --claim ...   # claim something
@@ -32,10 +32,14 @@ TEST="bash test-pimp"
       fi
 
       CMD=$*
-      bash $CMD >/dev/null && ERR=0 || ERR=1
+      #ec -g "CMD=$CMD"
+
+      $CMD >/dev/null && ERR=0 || ERR=1
       if [ "$ERR" == "$GOOD" ]; then
+         echo "$CMD" >>deps/tests
          echo "  OK: $CMD"
       else
+         echo "  *** $CMD" >>deps/errors
          printf "\x1b[31m"  # red
          echo "  FAIL: $CMD"
          printf "\x1b[0m"
@@ -48,32 +52,62 @@ TEST="bash test-pimp"
 # setup fixture
 #===============================================================================
 
-   mkdir deps
-   mkdir deps/bin
-   PIMP=../bin/pimp
+   if [ "$*" == "" ]; then
+		   rm -rf deps
+		   mkdir deps
+		   touch deps/tests
+		   touch deps/errors
 
-   bash $PIMP ---y "PIMP=$PIMP"
-   chmod +x $PIMP
+		   mkdir deps/bin
+
+		   bash $PIMP ---y "PIMP=$PIMP"
+		   chmod +x $PIMP
+   fi
+
+#===============================================================================
+$TEST --claim available deps/bin folder
+#===============================================================================
+
+   $TEST ls deps/bin
 
 #===============================================================================
 $TEST --claim help is working
 #===============================================================================
 
-   $TEST $PIMP -?
-   $TEST $PIMP --?
-   $TEST $PIMP --help
+   $TEST bash $PIMP -?
+   $TEST bash $PIMP --?
+   $TEST bash $PIMP --help
 
 #===============================================================================
 $TEST --claim version is supported
 #===============================================================================
 
-   $TEST $PIMP --version
-   $TEST $PIMP --v
+   $TEST bash $PIMP --version
+   $TEST bash $PIMP --v
 
 #===============================================================================
 $TEST --claim fail in case of missing arguments for --install
 #===============================================================================
 
-   $TEST -f $PIMP --install
-   $TEST -f $PIMP --install pimp
-   $TEST $PIMP --install $PIMP
+   $TEST -f bash $PIMP --install
+   $TEST -f bash $PIMP --install pimp
+   echo '  => unset BIN'; unset BIN
+   $TEST -f bash $PIMP --install $PIMP
+   echo '  => export BIN=junk/bin';  export BIN=junk/bin
+   $TEST -f bash $PIMP --install $PIMP
+   echo '  => export BIN=deps/bin';  export BIN=deps/bin
+   $TEST bash $PIMP --install $PIMP
+   $TEST bash $PIMP --install $PIMP deps/bin
+
+#===============================================================================
+# print summary
+#===============================================================================
+
+   printf "\x1b[36m"  # cyan
+   echo "summary: `cat deps/tests | wc -l` tests, `cat deps/errors | wc -l` error(s)"
+   printf "\x1b[0m"
+
+   printf "\x1b[31m"  # red
+   cat deps/errors
+   printf "\x1b[0m"
+   exit 0
