@@ -1,0 +1,79 @@
+#!/bin/bash
+# test-pimp: test pimp tool (run with: $ bash test-pimp)
+# Copyright (c) 2024 Bluenetics GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+rm -rf deps
+TEST="bash test-pimp"
+
+#===============================================================================
+# test-install --claim ...   # claim something
+#===============================================================================
+
+   if [ "$1" == "--claim" ]; then
+      shift
+      printf "\x1b[36m"  # cyan
+      echo "claim: $*"
+      printf "\x1b[0m"
+      exit 0
+   fi
+
+#===============================================================================
+# test-install <cmd>      # run command and print result
+# test-install -e <cmd>   # check error when run command and print result
+#===============================================================================
+
+   if [ "$*" != "" ]; then
+      if [ "$1" == '-f' ]; then
+         GOOD="1"
+         shift
+      else
+         GOOD="0"
+      fi
+
+      CMD=$*
+      bash $CMD >/dev/null && ERR=0 || ERR=1
+      if [ "$ERR" == "$GOOD" ]; then
+         echo "  OK: $CMD"
+      else
+         printf "\x1b[31m"  # red
+         echo "  FAIL: $CMD"
+         printf "\x1b[0m"
+         exit 1
+      fi
+      exit 0
+   fi
+
+#===============================================================================
+# setup fixture
+#===============================================================================
+
+   mkdir deps
+   mkdir deps/bin
+   PIMP=../bin/pimp
+
+   bash $PIMP ---y "PIMP=$PIMP"
+   chmod +x $PIMP
+
+#===============================================================================
+$TEST --claim help is working
+#===============================================================================
+
+   $TEST $PIMP -?
+   $TEST $PIMP --?
+   $TEST $PIMP --help
+
+#===============================================================================
+$TEST --claim version is supported
+#===============================================================================
+
+   $TEST $PIMP --version
+   $TEST $PIMP --v
+
+#===============================================================================
+$TEST --claim fail in case of missing arguments for --install
+#===============================================================================
+
+   $TEST -f $PIMP --install
+   $TEST -f $PIMP --install pimp
+   $TEST $PIMP --install $PIMP

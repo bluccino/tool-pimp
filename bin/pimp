@@ -8,11 +8,27 @@
 #===============================================================================
 
    if [ "$*" == "-?" ] || [ "$*" == "--help" ] || [ "$*" == "--?" ]; then
-      pimp ---g "usage: pimp virtual environment (version `pimp --version`)"
-      echo '  pimp <venv>        # pimp virtual environment <venv>'
-      echo '  pimp <venv> <bin>  # pimp virtual environment <venv> and install binaries in <bin>'
-      echo '  pimp -?            # show usage'
-      echo '  pimp --version     # print version'
+      pimp ---g   "pimp virtual environment (version `pimp --version`)"
+      pimp ---y   'usage: pimp [-ci?] [--<opt>] [<venv>] [<bin>]'
+      echo        '  pimp                       # pimp, consign and install files in virtual environment'
+      echo        '  pimp -c                    # consign files according to .pimp/consign list'
+      echo        '  pimp -i                    # install consigned files in virtual environment'
+      echo        '  pimp -d                    # consign and deploy binaries to $BIN directory'
+      echo        '  pimp @venv                 # pimp @venv to support setup/teardown'
+      echo        '  pimp @venv .pimp/bin       # also install binaries of .pimp/bin in @venv'
+      echo        '  pimp -?                    # show usage'
+      echo        '  pimp --help                # comprehensive help'
+      echo        '  pimp --version             # print version'
+      if [ "$*" != "-?" ]; then
+        pimp ---y "more commands"
+        echo      '  pimp --check @venv         # check if @venv is already pimped'
+        echo      '  pimp --install             # install pimp in $BIN directory'
+        echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
+        echo      '  pimp --locate              # locate virtual environment'
+        echo      '  pimp --pimp @venv          # actually pimp @venv'
+        echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
+        echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
+      fi
       exit  0
    fi
 
@@ -25,6 +41,46 @@
    fi
 
 #===============================================================================
+# pimp --install <pimp> [<bin>]  # install pimp in <bin> or $BIN directory
+#===============================================================================
+
+   if [ "$1" == "--install" ] && [ "$2" != "" ] && [ "$4" == "" ]; then
+      shift
+
+      if [ "$2" != "" ]; then   # <bin> arg provided!
+         BIN=$2
+      else
+         if [ "$BIN" == "" ]; then
+            pimp ---r "error: pimp $*"
+            echo      '       environment variable BIN=$BIN'
+            echo      '       consider to set something similar to: $ export BIN=~/bin'
+            exit 1
+         fi
+      fi
+
+         # check that $BIN is a directory
+
+      if [ ! -d "$BIN" ]; then
+         pimp ---r "error: pimp $*"
+         echo      "       no directory: BIN=$BIN"
+         exit 1
+      fi
+
+         # check that arg1 is a file
+
+      if [ ! -f "$1" ]; then
+         pimp ---r "error: pimp $*"
+         echo      "       arg1 is not denoting a file: $1"
+         exit 1
+      fi
+
+         # everything good - install!
+
+      pimp ---g "=== installing $1 in $BIN"
+      exit 0
+   fi
+
+##===============================================================================
 # pimp ---r 'text arg'   # internal helper: echo in red color
 # pimp ---g 'text arg'   # internal helper: echo in green color
 # pimp ---y 'text arg'   # internal helper: echo in yellow color
@@ -49,6 +105,7 @@
 # cannot deal with anything else ...
 #===============================================================================
 
-   pimp -?
-   pimp ---r 'bad command: 'pimp $*
+   printf "\x1b[31m";
+   echo "bad command: pimp $*";  printf "\x1b[0m"
+   echo '             for help invoke: pimp --help'
    exit 1
