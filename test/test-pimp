@@ -1,0 +1,131 @@
+#!/bin/bash
+# test-pimp: test pimp tool (run with: $ bash test-pimp)
+# Copyright (c) 2024 Bluenetics GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+   PIMP=pimp
+   TEST="bash test-pimp"
+
+#===============================================================================
+# test-install --claim ...   # claim something
+#===============================================================================
+
+   if [ "$1" == "--claim" ]; then
+      shift
+      printf "\x1b[36m"  # cyan
+      echo "claim: $*"
+      printf "\x1b[0m"
+      exit 0
+   fi
+
+#===============================================================================
+# test-install <cmd>      # run command and print result
+# test-install -e <cmd>   # check error when run command and print result
+#===============================================================================
+
+   if [ "$*" != "" ]; then
+      if [ "$1" == '-f' ]; then
+         GOOD="1"
+         shift
+      else
+         GOOD="0"
+      fi
+
+      CMD=$*
+      #ec -g "CMD=$CMD"
+
+      $CMD 2>/dev/null >/dev/null && ERR=0 || ERR=1
+      #$CMD && ERR=0 || ERR=1
+
+      if [ "$ERR" == "$GOOD" ]; then
+         echo "$CMD" >>build/tests
+         echo "  OK: $CMD"
+      else
+         echo "  *** $CMD" >>build/errors
+         printf "\x1b[31m"  # red
+         echo "  FAIL: $CMD"
+         printf "\x1b[0m"
+         exit 1
+      fi
+      exit 0
+   fi
+
+#===============================================================================
+# setup fixture
+#===============================================================================
+
+   if [ "$*" == "" ]; then
+		   rm -rf build
+		   mkdir build
+		   touch build/tests
+		   touch build/errors
+
+		   mkdir build/bin
+
+		   bash $PIMP ---y "PIMP=$PIMP"
+		   chmod +x $PIMP
+
+       export PATH=`pwd`/../bin:$PATH
+   fi
+
+#===============================================================================
+$TEST --claim available build/bin folder
+#===============================================================================
+
+   $TEST ls build/bin
+
+#===============================================================================
+$TEST --claim help is working
+#===============================================================================
+
+   $TEST $PIMP -?
+   $TEST $PIMP --?
+   $TEST $PIMP --help
+
+#===============================================================================
+$TEST --claim version is supported
+#===============================================================================
+
+   $TEST $PIMP --version
+   $TEST $PIMP --v
+
+#===============================================================================
+$TEST --claim --path option working
+#===============================================================================
+
+   $TEST $PIMP --path .git
+   $TEST $PIMP --path .pimp
+
+#===============================================================================
+$TEST --claim fail in case of missing arguments for --install
+#===============================================================================
+
+   $TEST -f bash $PIMP --install
+   $TEST -f bash $PIMP --install pimp
+   echo '  => unset BIN'; unset BIN
+   $TEST -f bash $PIMP --install $PIMP
+   echo '  => export BIN=junk/bin';  export BIN=junk/bin
+   $TEST -f bash $PIMP --install $PIMP
+   echo '  => export BIN=build/bin';  export BIN=build/bin
+   $TEST bash $PIMP --install ../bin/$PIMP
+   $TEST ls build/bin/pimp  # is pimp installed in build/bin
+   $TEST rm -f build/bin/pimp  # remove pimp in build/bin
+
+   $TEST bash $PIMP --install ../bin/$PIMP build/bin
+   $TEST ls build/bin/pimp  # is pimp installed in build/bin
+
+   $TEST rm -f build/bin/pimp  # remove pimp in build/bin
+   $TEST bash $PIMP --install
+
+#===============================================================================
+# print summary
+#===============================================================================
+
+   printf "\x1b[36m"  # cyan
+   echo "summary: `cat build/tests | wc -l` tests, `cat build/errors | wc -l` error(s)"
+   printf "\x1b[0m"
+
+   printf "\x1b[31m"  # red
+   cat build/errors
+   printf "\x1b[0m"
+   exit 0
