@@ -3,7 +3,7 @@
 # Copyright (c) 2024 Bluenetics GmbH
 # SPDX-License-Identifier: Apache-2.0
 
-   PIMP=../bin/pimp
+   PIMP=pimp
    TEST="bash test-pimp"
 
 #===============================================================================
@@ -35,6 +35,8 @@
       #ec -g "CMD=$CMD"
 
       $CMD 2>/dev/null >/dev/null && ERR=0 || ERR=1
+      #$CMD && ERR=0 || ERR=1
+
       if [ "$ERR" == "$GOOD" ]; then
          echo "$CMD" >>deps/tests
          echo "  OK: $CMD"
@@ -62,6 +64,8 @@
 
 		   bash $PIMP ---y "PIMP=$PIMP"
 		   chmod +x $PIMP
+
+       export PATH=`pwd`/../bin:$PATH
    fi
 
 #===============================================================================
@@ -74,16 +78,22 @@ $TEST --claim available deps/bin folder
 $TEST --claim help is working
 #===============================================================================
 
-   $TEST bash $PIMP -?
-   $TEST bash $PIMP --?
-   $TEST bash $PIMP --help
+   $TEST $PIMP -?
+   $TEST $PIMP --?
+   $TEST $PIMP --help
 
 #===============================================================================
 $TEST --claim version is supported
 #===============================================================================
 
-   $TEST bash $PIMP --version
-   $TEST bash $PIMP --v
+   $TEST $PIMP --version
+   $TEST $PIMP --v
+
+#===============================================================================
+$TEST --claim --path option working
+#===============================================================================
+
+   $TEST $PIMP --path .git
 
 #===============================================================================
 $TEST --claim fail in case of missing arguments for --install
@@ -96,12 +106,15 @@ $TEST --claim fail in case of missing arguments for --install
    echo '  => export BIN=junk/bin';  export BIN=junk/bin
    $TEST -f bash $PIMP --install $PIMP
    echo '  => export BIN=deps/bin';  export BIN=deps/bin
-   $TEST bash $PIMP --install $PIMP
+   $TEST bash $PIMP --install ../bin/$PIMP
    $TEST ls deps/bin/pimp  # is pimp installed in deps/bin
    $TEST rm -f deps/bin/pimp  # remove pimp in deps/bin
 
-   $TEST bash $PIMP --install $PIMP deps/bin
+   $TEST bash $PIMP --install ../bin/$PIMP deps/bin
    $TEST ls deps/bin/pimp  # is pimp installed in deps/bin
+
+   $TEST rm -f deps/bin/pimp  # remove pimp in deps/bin
+   $TEST bash $PIMP --install
 
 #===============================================================================
 # print summary

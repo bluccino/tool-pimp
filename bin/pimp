@@ -24,7 +24,7 @@
         echo      '  pimp --check @venv         # check if @venv is already pimped'
         echo      '  pimp --install             # install pimp in $BIN directory'
         echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
-        echo      '  pimp --locate              # locate virtual environment'
+        echo      '  pimp --path <dir>          # examine path of directory in upward hierarchy'
         echo      '  pimp --pimp @venv          # actually pimp @venv'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
         echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
@@ -37,7 +37,28 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0"; exit 0
+      echo "1.0.1"; exit 0
+   fi
+
+#===============================================================================
+# pimp --path <dir>   # examine path of directory in upward hierarchy
+#===============================================================================
+
+   if [ "$1" == "--path" ] && [ "$3" == "" ]; then
+      DIR=`pwd`/$2
+      #ec -g "DIR=$DIR"
+      if [ -d "$DIR" ]; then
+         echo $DIR
+         exit 0
+      fi
+
+      if [ "`pwd`" == "/" ]; then
+         exit 1
+      fi
+
+      cd ..
+      pimp --path $2 || exit 1
+      exit 0
    fi
 
 #===============================================================================
@@ -51,7 +72,6 @@
          BIN=$2
       else
          if [ "$BIN" == "" ]; then
-ec -g "error" >&2
             pimp ---r "error: pimp $*" >&2
             echo      '       environment variable BIN=$BIN' >&2
             echo      '       consider to set something similar to: $ export BIN=~/bin' >&2
@@ -62,7 +82,6 @@ ec -g "error" >&2
          # check that $BIN is a directory
 
       if [ ! -d "$BIN" ]; then
-ec -g "error" >&2
          pimp ---r "error: pimp $*" >&2
          echo      "       no directory: BIN=$BIN" >&2
          exit 1
@@ -71,7 +90,6 @@ ec -g "error" >&2
          # check that arg1 is a file
 
       if [ ! -f "$1" ]; then
-ec -g "error" >&2
          pimp ---r "error: pimp $*" >&2
          echo      "       arg1 is not denoting a file: $1" >&2
          exit 1

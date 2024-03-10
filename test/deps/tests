@@ -1,15 +1,17 @@
 ls deps/bin
-bash ../bin/pimp -?
-bash ../bin/pimp --?
-bash ../bin/pimp --help
-bash ../bin/pimp --version
-bash ../bin/pimp --v
-bash ../bin/pimp --install
-bash ../bin/pimp --install pimp
-bash ../bin/pimp --install ../bin/pimp
-bash ../bin/pimp --install ../bin/pimp
-bash ../bin/pimp --install ../bin/pimp
+pimp -?
+pimp --?
+pimp --help
+pimp --version
+pimp --v
+pimp --path .git
+bash pimp --install
+bash pimp --install pimp
+bash pimp --install pimp
+bash pimp --install pimp
+bash pimp --install ../bin/pimp
 ls deps/bin/pimp
 rm -f deps/bin/pimp
-bash ../bin/pimp --install ../bin/pimp deps/bin
+bash pimp --install ../bin/pimp deps/bin
 ls deps/bin/pimp
+rm -f deps/bin/pimp
