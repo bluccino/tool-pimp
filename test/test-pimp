@@ -38,10 +38,10 @@
       #$CMD && ERR=0 || ERR=1
 
       if [ "$ERR" == "$GOOD" ]; then
-         echo "$CMD" >>deps/tests
+         echo "$CMD" >>build/tests
          echo "  OK: $CMD"
       else
-         echo "  *** $CMD" >>deps/errors
+         echo "  *** $CMD" >>build/errors
          printf "\x1b[31m"  # red
          echo "  FAIL: $CMD"
          printf "\x1b[0m"
@@ -55,12 +55,12 @@
 #===============================================================================
 
    if [ "$*" == "" ]; then
-		   rm -rf deps
-		   mkdir deps
-		   touch deps/tests
-		   touch deps/errors
+		   rm -rf build
+		   mkdir build
+		   touch build/tests
+		   touch build/errors
 
-		   mkdir deps/bin
+		   mkdir build/bin
 
 		   bash $PIMP ---y "PIMP=$PIMP"
 		   chmod +x $PIMP
@@ -69,10 +69,10 @@
    fi
 
 #===============================================================================
-$TEST --claim available deps/bin folder
+$TEST --claim available build/bin folder
 #===============================================================================
 
-   $TEST ls deps/bin
+   $TEST ls build/bin
 
 #===============================================================================
 $TEST --claim help is working
@@ -106,15 +106,15 @@ $TEST --claim fail in case of missing arguments for --install
    $TEST -f bash $PIMP --install $PIMP
    echo '  => export BIN=junk/bin';  export BIN=junk/bin
    $TEST -f bash $PIMP --install $PIMP
-   echo '  => export BIN=deps/bin';  export BIN=deps/bin
+   echo '  => export BIN=build/bin';  export BIN=build/bin
    $TEST bash $PIMP --install ../bin/$PIMP
-   $TEST ls deps/bin/pimp  # is pimp installed in deps/bin
-   $TEST rm -f deps/bin/pimp  # remove pimp in deps/bin
+   $TEST ls build/bin/pimp  # is pimp installed in build/bin
+   $TEST rm -f build/bin/pimp  # remove pimp in build/bin
 
-   $TEST bash $PIMP --install ../bin/$PIMP deps/bin
-   $TEST ls deps/bin/pimp  # is pimp installed in deps/bin
+   $TEST bash $PIMP --install ../bin/$PIMP build/bin
+   $TEST ls build/bin/pimp  # is pimp installed in build/bin
 
-   $TEST rm -f deps/bin/pimp  # remove pimp in deps/bin
+   $TEST rm -f build/bin/pimp  # remove pimp in build/bin
    $TEST bash $PIMP --install
 
 #===============================================================================
@@ -122,10 +122,10 @@ $TEST --claim fail in case of missing arguments for --install
 #===============================================================================
 
    printf "\x1b[36m"  # cyan
-   echo "summary: `cat deps/tests | wc -l` tests, `cat deps/errors | wc -l` error(s)"
+   echo "summary: `cat build/tests | wc -l` tests, `cat build/errors | wc -l` error(s)"
    printf "\x1b[0m"
 
    printf "\x1b[31m"  # red
-   cat deps/errors
+   cat build/errors
    printf "\x1b[0m"
    exit 0
