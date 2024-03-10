@@ -1,0 +1,2 @@
+echo 'hello, @my-ws'
+alias la='ls -a'

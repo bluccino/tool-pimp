@@ -1,0 +1,54 @@
+#!/bin/bash
+# pimp: pimp virtual environment to support setup/teardown
+# Copyright (c) 2024 Bluenetics GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+#===============================================================================
+# pimp -?;  pimp --help   # show usage
+#===============================================================================
+
+   if [ "$*" == "-?" ] || [ "$*" == "--help" ] || [ "$*" == "--?" ]; then
+      pimp ---g "usage: pimp virtual environment (version `pimp --version`)"
+      echo '  pimp <venv>        # pimp virtual environment <venv>'
+      echo '  pimp <venv> <bin>  # pimp virtual environment <venv> and install binaries in <bin>'
+      echo '  pimp -?            # show usage'
+      echo '  pimp --version     # print version'
+      exit  0
+   fi
+
+#===============================================================================
+# pimp --version   # print version
+#===============================================================================
+
+   if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
+      echo "1.0.0"; exit 0
+   fi
+
+#===============================================================================
+# pimp ---r 'text arg'   # internal helper: echo in red color
+# pimp ---g 'text arg'   # internal helper: echo in green color
+# pimp ---y 'text arg'   # internal helper: echo in yellow color
+#===============================================================================
+
+   if [ "$1" == "---r" ]; then
+      printf "\x1b[31m";  shift;  echo "$*";  printf "\x1b[0m"
+      exit 0
+   fi
+
+   if [ "$1" == "---g" ]; then
+      printf "\x1b[32m";  shift;  echo "$*";  printf "\x1b[0m"
+      exit 0
+   fi
+
+   if [ "$1" == "---y" ]; then
+      printf "\x1b[33m";  shift;  echo "$*";  printf "\x1b[0m"
+      exit 0
+   fi
+
+#===============================================================================
+# cannot deal with anything else ...
+#===============================================================================
+
+   pimp -?
+   pimp ---r 'bad command: 'pimp $*
+   exit 1
