@@ -11,7 +11,7 @@ to download and install `pimp`. Select a number from the list of potential
 install directories (which are extracted from your PATH).
 
 ```
-  curl -s https://raw.githubusercontent.com/bluccino/tools-pimp/master/bin/pimp >~pimp; bash ~pimp -!
+  curl -s https://raw.githubusercontent.com/bluccino/tool-pimp/master/bin/pimp >~pimp; bash ~pimp -!
 ```
 
 
