@@ -116,6 +116,45 @@
     fi
 
 #===============================================================================
+# pimp -!   # install in a system binary directory
+#===============================================================================
+
+   if [ "$*" == "-!" ]; then
+      if [ ! -f ~pimp ]; then
+         pimp ---r "error: pimp -!" >&2
+         echo      "       file ~pimp not found!" >&2
+         exit 1
+      fi
+
+      LIST=''
+      for CHUNK in $(echo "$PATH" | sed 's/:/ /g')
+      do
+         LIST="$LIST $CHUNK"
+      done
+
+      pimp ---y "select directory for installation of pimp:"
+	    select DIR in $LIST
+	    do
+        ERR="0"
+        touch $DIR/_junk_ >/dev/null || ERR="1"
+        rm -f $DIR/_junk_
+	      exit 0
+	    done
+
+      pimp ---g "=== installing pimp in $DIR ..."
+      if [ "$ERR" == "0" ]; then       # no write protection
+         cp ~pimp $DIR/pimp || exit 1
+      else                             # write protection
+         pimp ---y "this is a protected directory which uses a password!"
+         sudo cp ~pimp $DIR/pimp || exit 1
+      fi
+      pimp ---g "=== sucessful installation of pimp"
+
+      rm -f ~pimp                      # cleanup
+      exit 0
+   fi
+
+#===============================================================================
 # pimp --path <dir>   # examine path of directory in upward hierarchy
 #===============================================================================
 
