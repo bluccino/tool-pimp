@@ -26,6 +26,7 @@
         echo      '  . pimp --activate @venv    # activate given virtual environment @venv'
         echo      '  pimp --check @venv         # check if @venv is already pimped'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
+        echo      '  pimp --init @venv          # init a .pimp directory with setup/cleanup samples'
         echo      '  pimp --install             # install pimp in $BIN directory'
         echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
         echo      '  pimp --path <dir>          # examine path of directory in upward hierarchy'
@@ -42,7 +43,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0y";
+      echo "1.0.0z";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -171,6 +172,71 @@
       done
 
       chmod +x $PIMP/bin/*
+      exit 0
+   fi
+
+#===============================================================================
+# pimp --init @venv  # init a .pimp directory with setup/cleanup samples
+#===============================================================================
+
+   if [ "$1" == "--init" ] && [ "$3" == "" ]; then
+      VENV=$2
+      if [ "$VENV" == "" ]; then
+         pimp ---r "error: pimp $*" >&2
+         echo      "       missing arg2 (name of virtual environment to be created)" >&2
+         exit 1
+      fi
+
+      if [ -d ".pimp" ]; then
+         pimp ---r "error: pimp $*" >&2
+         echo      "       directory .pimp already existing (stop processing)" >&2
+         exit 1
+      fi
+
+      pimp ---g "=== initializing .pimp directory ..."
+         # make .pimp and .pimp/bin directories and provide .pimp/venv
+
+      mkdir .pimp || exit 1
+      PIMPBIN=.pimp/bin
+      mkdir $PIMPBIN || exit 1
+      echo $2 >.pimp/venv
+
+         # provide a setup sample
+
+      echo '#!/bin/bash' >$PIMPBIN/setup
+      echo '# setup (setup script for virtual environment)' >$PIMPBIN/setup
+      echo '' >$PIMPBIN/setup
+      echo "echo '=== setup virtual environment ...'" >$PIMPBIN/setup
+
+         # provide a cleanup sample
+
+      echo '#!/bin/bash' >$PIMPBIN/cleanup
+      echo '# setup (setup script for virtual environment)' >$PIMPBIN/cleanup
+      echo '' >$PIMPBIN/cleanup
+      echo "echo '=== cleanup virtual environment ...'" >$PIMPBIN/cleanup
+
+         # provide consign and deploy skeletons
+
+      touch .pimp/consign
+      touch .pimp/deploy
+
+         # add virtual environment name to .gitignore
+
+      if [ -d ".git" ]; then
+         if [ -f ".gitignore" ]; then
+            cat .gitignore | grep "$VENV" >/dev/null && exit 0  # nothing to do
+         fi
+
+         read -p "shall I add $VENV to .gitignore [Y/n]?" ANS
+ 		     if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
+				   exit 0
+				 fi
+
+         pimp ---g "=== adding $VENV to .gitignore"
+         echo '' >>.gitignore
+         echo '# virtual environment folder' >>.gitignore
+         echo "$VENV" >>.gitignore
+      fi
       exit 0
    fi
 
@@ -339,7 +405,7 @@ fi
 
             read -p "shall I create virtual environment $VENV [Y/n]?" ANS
 				    if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
-				       exit 1
+				       exit 0
 				    fi
 
             if [ "`which python3`" == "" ]; then
@@ -382,6 +448,16 @@ fi
 	          echo "  $FILE -> $VENV/bin"
 	          cp $FILE $VENV/bin
 	       done
+      fi
+
+      if [ -d .west ]; then
+         pimp ---y ".west directory detected"
+         read -p "shall I install west in $VENV [Y/n]?" ANS
+				 if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
+            pimp ---g "=== installing west"
+            $VENV/bin/activate
+            pip install west
+				 fi
       fi
 
 	    pimp ---g "=== pimping complete"
