@@ -19,16 +19,39 @@
    fi
 
 #===============================================================================
+# setup fixture
+#===============================================================================
+
+   if [ "$*" == "" ]; then
+       if [ "$TESTBUILD" == "" ]; then
+          export TESTBUILD=`pwd`/build
+       fi
+
+		   rm -rf $TESTBUILD
+		   mkdir $TESTBUILD
+
+		   touch $TESTBUILD/tests
+		   touch $TESTBUILD/errors
+
+		   mkdir $TESTBUILD/bin
+
+		   bash $PIMP ---y "PIMP=$PIMP"
+		   chmod +x $PIMP
+
+       export PATH=`pwd`/../bin:$PATH
+   fi
+
+#===============================================================================
 # test-install <cmd>      # run command and print result
 # test-install -e <cmd>   # check error when run command and print result
 #===============================================================================
 
    if [ "$*" != "" ]; then
       if [ "$1" == '-f' ]; then
-         GOOD="1"
+         GOOD="1";  OK='-OK';  FAIL='-FAIL'
          shift
       else
-         GOOD="0"
+         GOOD="0";  OK='+OK';  FAIL='+FAIL'
       fi
 
       CMD=$*
@@ -38,34 +61,16 @@
       #$CMD && ERR=0 || ERR=1
 
       if [ "$ERR" == "$GOOD" ]; then
-         echo "$CMD" >>build/tests
-         echo "  OK: $CMD"
+         echo "$CMD" >>$TESTBUILD/tests
+         echo "  $OK: $CMD"
       else
-         echo "  *** $CMD" >>build/errors
+         echo "  *** $CMD" >>$TESTBUILD/errors
          printf "\x1b[31m"  # red
-         echo "  FAIL: $CMD"
+         echo "  $FAIL: $CMD"
          printf "\x1b[0m"
          exit 1
       fi
       exit 0
-   fi
-
-#===============================================================================
-# setup fixture
-#===============================================================================
-
-   if [ "$*" == "" ]; then
-		   rm -rf build
-		   mkdir build
-		   touch build/tests
-		   touch build/errors
-
-		   mkdir build/bin
-
-		   bash $PIMP ---y "PIMP=$PIMP"
-		   chmod +x $PIMP
-
-       export PATH=`pwd`/../bin:$PATH
    fi
 
 #===============================================================================
@@ -97,7 +102,29 @@ $TEST --claim --path option working
    $TEST $PIMP --path .pimp
 
 #===============================================================================
-$TEST --claim fail in case of missing arguments for --install
+$TEST --claim --consign option working
+#===============================================================================
+
+   $TEST mkdir build/tmp
+   $TEST mv ../.pimp/consign build/tmp/
+   $TEST -f $PIMP --consign
+   $TEST touch build/tmp/red
+   $TEST touch build/tmp/green
+   $TEST touch build/tmp/blue
+   $TEST rm -f ../.pimp/bin/*
+   $TEST eval 'echo test/build/tmp/red >>../.pimp/consign'
+   $TEST eval 'echo test/build/tmp/green >>../.pimp/consign'
+   $TEST eval 'echo test/build/tmp/blue >>../.pimp/consign'
+   $TEST $PIMP --consign
+   $TEST cat ../.pimp/bin/red
+   $TEST cat ../.pimp/bin/green
+   $TEST cat ../.pimp/bin/blue
+   $TEST -f cat ../.pimp/bin/yellow
+   $TEST rm -f ../.pimp/bin/*
+   $TEST mv build/tmp/consign ../.pimp/
+
+#===============================================================================
+$TEST --claim testing cases with --install option
 #===============================================================================
 
    $TEST -f bash $PIMP --install

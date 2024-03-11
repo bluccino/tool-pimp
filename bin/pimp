@@ -78,7 +78,7 @@
          mkdir $PIMP/bin || exit 1
       fi
 
-         # consign files listen in consignment file
+         # consign files listed in consignment file
 
       pimp ---g "=== consigning files (=> $PIMP/bin)"
 
