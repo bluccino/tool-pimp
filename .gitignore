@@ -2,3 +2,4 @@ deps
 build
 @pimp
 ~pimp
+test/.pimp
