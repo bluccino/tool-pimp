@@ -444,7 +444,7 @@ fi
 	    pimp ---g '=== updating pimp ...'
 
 	    echo "  curl -s $URL >~pimp"
-	    curl -s $_URL >~vamos
+	    curl -s $URL >~pimp
 
       ERR="0"
       rm -f $PIMP >/dev/null || ERR="1"
