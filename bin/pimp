@@ -125,6 +125,7 @@
          echo      "       file ~pimp not found!" >&2
          exit 1
       fi
+      chmod +x ~pimp
 
       LIST=''
       for CHUNK in $(echo "$PATH" | sed 's/:/ /g')
