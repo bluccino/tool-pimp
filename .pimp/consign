@@ -1,0 +1,5 @@
+bin/pimp
+bin/setup
+bin/cleanup
+bin/help
+tools/bin/ec
