@@ -26,6 +26,7 @@
         echo      '  . pimp --activate @venv    # activate given virtual environment @venv'
         echo      '  pimp --check @venv         # check if @venv is already pimped'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
+        echo      '  pimp --deploy              # deploy files in .pimp/deploy to binary system folder'
         echo      '  pimp --init @venv          # init a .pimp directory with setup/cleanup samples'
         echo      '  pimp --install             # install pimp in $BIN directory'
         echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
@@ -44,7 +45,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0z";
+      echo "1.0.0";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -128,13 +129,8 @@
       fi
       chmod +x ~pimp
 
-      LIST=''
-      for CHUNK in $(echo "$PATH" | sed 's/:/ /g')
-      do
-         LIST="$LIST $CHUNK"
-      done
-
-      bash ~pimp ---y "select directory for installation of pimp:"
+      bash ~pimp ---y "select target directory for installation of pimp:"
+      LIST=`pimp --directories`
 	    select DIR in $LIST
 	    do
          ERR="0"
@@ -156,6 +152,20 @@
          rm -f ~pimp                      # cleanup
  	       exit 0
 	    done
+      exit 0
+   fi
+
+#===============================================================================
+# pimp ---directories   # generate list of install directories
+#===============================================================================
+
+   if [ "$*" == "--directories" ]; then
+      LIST=''
+      for CHUNK in $(echo "$PATH" | sed 's/:/ /g')
+      do
+         LIST="$LIST $CHUNK"
+      done
+      echo $LIST
       exit 0
    fi
 
@@ -216,6 +226,132 @@
       done
 
       chmod +x $PIMP/bin/*
+      exit 0
+   fi
+
+#===============================================================================
+# pimp --deploy   # tool deployment
+#===============================================================================
+
+   if [ "$*" == "--deploy" ]; then
+      if [ ! -f .pimp/deploy ]; then
+         bash pimp ---r "error: pimp $*" >&2
+         echo           "       no deployment list (file .pimp/deploy) provided" >&2
+         exit 1
+      fi
+
+      if [ "`cat .pimp/deploy`" == "" ]; then
+         pimp ---g "=== empty deploy list (nothing to deploy)"
+         exit 0
+      fi
+
+      bash ~pimp ---y "select target directory for deployment:"
+      LIST=`pimp --directories`
+	    select BIN in $LIST
+	    do
+         ERR="0"
+         touch $BIN/_junk_ >/dev/null || ERR="1"
+         rm -f $BIN/_junk_ >/dev/null
+
+            # first show deployment status
+
+         TOOLS=`pimp ---deploy-status $BIN`
+         if [ "$TOOLS" == "" ]; then
+            pimp ---g "everything up-to-date (no further deployment action)"
+            exit 0
+         fi
+
+            # prompt to confirm deployment
+
+         pimp ---y "confirm deployment!"
+         read -p "go ahead [Y/n]?" ANS
+ 		     if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
+				   exit 0
+				 fi
+
+            # actual deployment
+
+         bash ~pimp ---g "=== deploying tools in $BIN ..."
+         SRC=.pimp/bin
+
+			   for TOOL in $TOOLS
+			   do
+            FILE="${TOOL##*/}"
+			      VSRC=`bash $TOOL --version 2>/dev/null`
+			      VDST=`bash $BIN/$FILE --version 2>/dev/null`
+
+	          if [ "$VDST" == "" ] && [ ! -f $BIN/$FILE ]; then
+	             VDST='not installed'
+	          fi
+
+	          if [ "$VSRC" == "" ]; then VSRC='???'; fi
+	          if [ "$VDST" == "" ]; then VDST='???'; fi
+
+	          if [ "$VSRC" != '???' ] && [ "$VDST" != '???' ]; then
+	             if [ "$VSRC" != "$VDST" ]; then
+                  if [ "$ERR" == "0" ]; then
+   	                 echo "    cp $TOOL $BIN;  chmod +x $BIN/$FILE"
+	                   cp $TOOL $BIN;  chmod +x $BIN/$FILE
+                  else
+   	                 echo "    sudo cp $TOOL $BIN;  sudo chmod +x $BIN/$FILE"
+	                   sudo cp $TOOL $BIN;  sudo chmod +x $BIN/$FILE
+                  fi
+	             fi
+	          else
+	             pimp ---m "    note: not updating $TOOL"
+	             pimp ---m "          reason: missing version information ($VSRC => $VDST)"
+	             pimp ---m "          (you may manually delete the installed tool)"
+	          fi
+			   done
+
+         pimp ---g "=== deployment complete!"
+         exit 0
+	    done
+      exit 0
+   fi
+
+#===============================================================================
+# tools ---deploy-status <dst>  # show deployment status"
+#===============================================================================
+
+   if [ "$1" == "---deploy-status" ] && [ "$2" != "" ] && [ "$3" == "" ]; then
+      BIN=$2
+      SRC=.pimp/bin
+
+      ec -g "deployment status:" 1>&2
+      ec -y "tools to be deployed into $BIN:" 1>&2
+
+      TOOLS=''
+      for TOOL in `cat .pimp/deploy`
+      do
+         FILE="${TOOL##*/}"
+         VSRC=`bash $TOOL --version 2>/dev/null`
+         VDST=`bash $BIN/$FILE --version 2>/dev/null`
+
+         if [ "$VDST" == "" ] && [ ! -f $BIN/$FILE ]; then
+            VDST='not installed'
+         fi
+
+         if [ "$VSRC" == "" ]; then VSRC='???'; fi
+         if [ "$VDST" == "" ]; then VDST='???'; fi
+
+	       if [ "$VSRC" != "$VDST" ]; then
+            TOOLS="$TOOLS $TOOL"
+         fi
+
+         TOOLSTR=$TOOL':               '
+
+         AVAIL="$VSRC"',              '
+         if [ "$VSRC" != "$VDST" ]; then
+            pimp ---c "    ${TOOLSTR:0:10} available: ${AVAIL:0:10} current: $VDST" 1>&2
+         else
+            echo "    ${TOOLSTR:0:10} available: ${AVAIL:0:10} current: $VDST" 1>&2
+         fi
+      done
+
+      if [ "$TOOLS" != "" ]; then
+         echo $TOOLS
+      fi
       exit 0
    fi
 
@@ -433,6 +569,16 @@ fi
       exit 0
    fi
 
+   if [ "$1" == "---m" ]; then
+      printf "\x1b[35m";  shift;  echo "$*";  printf "\x1b[0m"
+      exit 0
+   fi
+
+   if [ "$1" == "---c" ]; then
+      printf "\x1b[36m";  shift;  echo "$*";  printf "\x1b[0m"
+      exit 0
+   fi
+
 #===============================================================================
 # pimp --update   # update current pimp installation to latest version
 #===============================================================================
@@ -444,7 +590,7 @@ fi
 	    pimp ---g '=== updating pimp ...'
 
 	    echo "  curl -s $URL >~pimp"
-	    curl -s $_URL >~vamos
+	    curl -s $URL >~pimp
 
       ERR="0"
       rm -f $PIMP >/dev/null || ERR="1"
