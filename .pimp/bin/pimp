@@ -38,7 +38,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0a"; exit 0
+      echo "1.0.0"; exit 0
    fi
 
 #===============================================================================
@@ -291,7 +291,6 @@ fi
 
          # next we consign the binaries
 
-      pimp ---g "=== consigning binaries ..."
       pimp --consign || exit
 
          # copy consigned binaries to virtual environment
