@@ -23,6 +23,7 @@
       if [ "$*" != "-?" ]; then
         pimp ---y "more commands"
         echo      '  . pimp --activate          # locate and activate virtual environment'
+        echo      '  . pimp --activate @venv    # activate given virtual environment @venv'
         echo      '  pimp --check @venv         # check if @venv is already pimped'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
         echo      '  pimp --install             # install pimp in $BIN directory'
@@ -65,10 +66,11 @@
    fi
 
 #===============================================================================
-# . pimp --activate   # locate and activate virtual environment
+# . pimp --activate        # locate and activate virtual environment
+# . pimp --activate @venv  # activate given virtual environment
 #===============================================================================
 
-   if [ "$*" == "--activate" ]; then
+   if [ "$1" == "--activate" ] && [ "$3" == "" ]; then
       if [ "$_SOURCED" == 0 ]; then
          bash pimp ---r "error: pimp $*" >&2
          echo      "     this command line must be sourced!" >&2
@@ -77,8 +79,13 @@
          return 1 2>/dev/null || exit 1  # safe return/exit
       fi
 
-      _VENV=`pimp --venv`
-      if [ "$_VENV" == "" ]; then
+      if [ "$2" == "" ]; then
+         _VENV=`pimp --venv`
+      else
+         _VENV=$2
+      fi
+
+      if [ ! -d "$_VENV" ]; then
          bash pimp ---r "error: pimp $*" >&2
          echo      "       unable to locate virtual environment" >&2
 
