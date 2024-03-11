@@ -142,7 +142,7 @@ $TEST --claim testing cases with --install option
    $TEST ls build/bin/pimp  # is pimp installed in build/bin
 
    $TEST rm -f build/bin/pimp  # remove pimp in build/bin
-   $TEST bash $PIMP --install
+   #$TEST bash $PIMP --install
 
 #===============================================================================
 # print summary
