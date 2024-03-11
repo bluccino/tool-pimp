@@ -121,7 +121,7 @@
 
    if [ "$*" == "-!" ]; then
       if [ ! -f ~pimp ]; then
-         pimp ---r "error: pimp -!" >&2
+         bash ~pimp ---r "error: pimp -!" >&2
          echo      "       file ~pimp not found!" >&2
          exit 1
       fi
@@ -132,25 +132,28 @@
          LIST="$LIST $CHUNK"
       done
 
-      pimp ---y "select directory for installation of pimp:"
+      bash ~pimp ---y "select directory for installation of pimp:"
 	    select DIR in $LIST
 	    do
-        ERR="0"
-        touch $DIR/_junk_ >/dev/null || ERR="1"
-        rm -f $DIR/_junk_
-	      exit 0
+         ERR="0"
+         touch $DIR/_junk_ >/dev/null || ERR="1"
+         rm -f $DIR/_junk_ >/dev/null
+
+         bash ~pimp ---g "=== installing pimp in $DIR ..."
+         if [ "$ERR" == "0" ]; then       # no write protection
+            bash ~pimp ---y "  cp ~pimp $DIR/pimp"
+            cp ~pimp $DIR/pimp || exit 1
+         else                             # write protection
+            bash ~pimp ---y "  this is a protected directory which uses a password!"
+            bash ~pimp ---y "  sudo cp ~pimp $DIR/pimp"
+            sudo cp ~pimp $DIR/pimp || exit 1
+         fi
+         bash ~pimp ---g "=== sucessful installation of pimp"
+         echo '  => enter: pimp -?   # to see usage'
+
+         rm -f ~pimp                      # cleanup
+ 	       exit 0
 	    done
-
-      pimp ---g "=== installing pimp in $DIR ..."
-      if [ "$ERR" == "0" ]; then       # no write protection
-         cp ~pimp $DIR/pimp || exit 1
-      else                             # write protection
-         pimp ---y "this is a protected directory which uses a password!"
-         sudo cp ~pimp $DIR/pimp || exit 1
-      fi
-      pimp ---g "=== sucessful installation of pimp"
-
-      rm -f ~pimp                      # cleanup
       exit 0
    fi
 
@@ -494,7 +497,7 @@ fi
          read -p "shall I install west in $VENV [Y/n]?" ANS
 				 if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
             pimp ---g "=== installing west"
-            $VENV/bin/activate
+            source $VENV/bin/activate
             pip install west
 				 fi
       fi
