@@ -27,6 +27,7 @@
         echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
         echo      '  pimp --path <dir>          # examine path of directory in upward hierarchy'
         echo      '  pimp --pimp                # actually pimp'
+        echo      '  pimp --venv                # echo name of virtual environment directory'
         echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
       fi
       exit  0
@@ -95,6 +96,8 @@
             echo      "       unable to consign file: $FILE" >&2
          fi
       done
+
+      chmod +x $PIMP/bin/*
       exit 0
    fi
 
@@ -150,7 +153,7 @@
 #===============================================================================
 
    if [ "$*" == "--pimp" ]; then
-      ACTIVATE=`pimp ---venv`/bin/activate
+      ACTIVATE=`pimp --venv`/bin/activate
 
       if [ ! -f "$ACTIVATE" ]; then
          pimp ---r "error: pimp $*" >&2
@@ -173,7 +176,7 @@
    fi
 
 #===============================================================================
-# pimp ---pimp-setup <activate>
+# helper: pimp ---pimp-setup <activate>
 #===============================================================================
 
   if [ "$1" == '---pimp-setup' ] && [ "$2" != "" ] && [ "$3" == "" ]; then
@@ -187,7 +190,7 @@
   fi
 
 #===============================================================================
-# pimp ---pimp-cleanup <activate>
+# helper: pimp ---pimp-cleanup <activate>
 #===============================================================================
 
 if [ "$1" == '---pimp-cleanup' ] && [ "$2" != "" ] && [ "$3" == "" ]; then
@@ -209,16 +212,17 @@ fi\
 fi
 
 #===============================================================================
-# pimp ---venv   # locate virtual environment folder
+# helper: pimp --venv   # locate virtual environment folder
 #===============================================================================
 
-   if [ "$*" == "---venv" ]; then
+   if [ "$*" == "--venv" ]; then
       FILES=`ls -a`
       for DIR in $FILES
       do
          if [ -d "$DIR" ] && [ "$DIR" != "." ] && [ "$DIR" != ".." ]; then
             if [ -f $DIR/bin/activate ]; then
                echo $DIR
+               exit 0
             fi
          fi
       done
@@ -226,9 +230,9 @@ fi
    fi
 
 #===============================================================================
-# pimp ---r 'text arg'   # internal helper: echo in red color
-# pimp ---g 'text arg'   # internal helper: echo in green color
-# pimp ---y 'text arg'   # internal helper: echo in yellow color
+# helper: pimp ---r 'text arg'   # internal helper: echo in red color
+#         pimp ---g 'text arg'   # internal helper: echo in green color
+#         pimp ---y 'text arg'   # internal helper: echo in yellow color
 #===============================================================================
 
    if [ "$1" == "---r" ]; then
@@ -243,6 +247,72 @@ fi
 
    if [ "$1" == "---y" ]; then
       printf "\x1b[33m";  shift;  echo "$*";  printf "\x1b[0m"
+      exit 0
+   fi
+
+#===============================================================================
+# pimp   # pimp, consign and install files in virtual environment
+#===============================================================================
+
+   if [ "$*" == "" ]; then
+      VENV=`pimp --venv`
+
+         # check existence of virtual environment, and occasionally create
+
+      if [ "$VENV" == "" ]; then
+         if [ -f .pimp/venv ]; then
+            VENV=`cat .pimp/venv`
+            pimp ---g "virtual environment not existing!"
+
+            read -p "shall I create virtual environment $VENV [Y/n]?" ANS
+				    if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
+				       exit 1
+				    fi
+
+            if [ "`which python3`" == "" ]; then
+               pimp ---r "python3 is not installed"
+               echo      '=> please install python3 (versin >= 3.11)'
+               exit 1
+            fi
+
+            pimp ---g "=== creating virtual environment $VENV ..."
+            python3 -m venv $VENV || exit 1
+
+         else
+            pimp ---r "error: pimp $*" >&2
+            echo      "       virtual environment not existing" >&2
+            exit 1
+         fi
+      fi
+
+         # next we pimp the virtual environment
+
+      pimp --pimp
+
+         # next we consign the binaries
+
+      pimp ---g "=== consigning binaries ..."
+      pimp --consign || exit
+
+         # copy consigned binaries to virtual environment
+
+      pimp ---g "=== copy consigned binaries to virtual environment"
+      PIMP=`pimp --path .pimp`
+
+      if [ "$PIMP" == "" ]; then
+         pimp ---r "error: unable to locate .pimp directory" >&2
+         exit 1
+      fi
+
+      if [ -d "$PIMP/bin" ]; then
+  	     for FILE in $PIMP/bin/*
+	       do
+	          echo "  $FILE -> $VENV/bin"
+	          cp $FILE $VENV/bin
+	       done
+      fi
+
+	    pimp ---g "=== pimping complete"
       exit 0
    fi
 

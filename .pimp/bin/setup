@@ -2,3 +2,8 @@
 # setup (setup script for virtual environment)
 
 echo '=== setup virtual environment ...'
+alias ve="source `pimp --venv`/bin/activate"
+alias de=deactivate
+alias ?="bash `pimp --venv`/bin/help"
+
+ec -g 'type ? for help on virtual environment commands'
