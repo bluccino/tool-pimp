@@ -26,6 +26,7 @@
         echo      '  . pimp --activate @venv    # activate given virtual environment @venv'
         echo      '  pimp --check @venv         # check if @venv is already pimped'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
+        echo      '  pimp --deploy              # deploy files in .pimp/deploy to binary system folder'
         echo      '  pimp --init @venv          # init a .pimp directory with setup/cleanup samples'
         echo      '  pimp --install             # install pimp in $BIN directory'
         echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
