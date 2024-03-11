@@ -31,6 +31,7 @@
         echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
         echo      '  pimp --path <dir>          # examine path of directory in upward hierarchy'
         echo      '  pimp --pimp                # actually pimp'
+        echo      '  pimp --update              # update current pimp installation to latest version'
         echo      '  pimp --venv                # echo name of virtual environment directory'
         echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
       fi
@@ -431,6 +432,38 @@ fi
       printf "\x1b[33m";  shift;  echo "$*";  printf "\x1b[0m"
       exit 0
    fi
+
+#===============================================================================
+# pimp --update   # update current pimp installation to latest version
+#===============================================================================
+
+	 if [ "$1" == "--update" ]; then
+	    URL=https://raw.githubusercontent.com/bluccino/tool-pimp/master/bin/pimp
+      PIMP=`which pimp`
+
+	    pimp ---g '=== updating pimp ...'
+
+	    echo "  curl -s $URL >~pimp"
+	    curl -s $_URL >~vamos
+
+      ERR="0"
+      rm -f $PIMP >/dev/null || ERR="1"
+
+      if [ "$ERR" == "0" ]; then
+	       echo "  cp ~pimp $PIMP"
+         cp ~pimp $PIMP
+	       echo "  chmod +x $PIMP"
+         chmod +x $PIMP
+      else
+	       echo "  sudo cp ~pimp $PIMP"
+         cp ~pimp $PIMP
+	       echo "  sudo chmod +x $PIMP"
+         chmod +x $PIMP
+      fi
+
+      pimp ---r "pimp update complete (version `pimp --version`)"
+	    exit 0
+	 fi
 
 #===============================================================================
 # pimp   # pimp, consign and install files in virtual environment
