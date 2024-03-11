@@ -2,7 +2,7 @@
 # setup (setup script for virtual environment)
 
 echo '=== setup virtual environment ...'
-alias ve="source `pimp --venv`/bin/activate"
+alias ve='source pimp --activate'
 alias de=deactivate
 alias ?="bash `pimp --venv`/bin/help"
 

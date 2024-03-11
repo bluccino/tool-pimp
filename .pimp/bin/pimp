@@ -11,6 +11,7 @@
       pimp ---g   "pimp virtual environment (version `pimp --version`)"
       pimp ---y   'usage: pimp [-ci?] [--<opt>] [<venv>] [<bin>]'
       echo        '  pimp                       # pimp, consign and install files in virtual environment'
+      echo        '  . pimp                     # pimp, consign, install and activate virtual environment'
       echo        '  pimp -c                    # consign files according to .pimp/consign list'
       echo        '  pimp -i                    # install consigned files in virtual environment'
       echo        '  pimp -d                    # consign and deploy binaries to $BIN directory'
@@ -21,6 +22,7 @@
       echo        '  pimp --version             # print version'
       if [ "$*" != "-?" ]; then
         pimp ---y "more commands"
+        echo      '  . pimp --activate          # locate and activate virtual environment'
         echo      '  pimp --check @venv         # check if @venv is already pimped'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
         echo      '  pimp --install             # install pimp in $BIN directory'
@@ -30,7 +32,8 @@
         echo      '  pimp --venv                # echo name of virtual environment directory'
         echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
       fi
-      exit  0
+
+      return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
 #===============================================================================
@@ -38,8 +41,71 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0"; exit 0
+      echo "1.0.0x";
+      return 0 2>/dev/null || exit 0  # safe return/exit
    fi
+
+#===============================================================================
+# examine whether this script is running in sourced/unsourced mode
+# - note: each dispatching clause needs to unset _SOURCED
+#===============================================================================
+
+   (return 0 2>/dev/null) && _SOURCED=1 || _SOURCED=0  # determine _SOURCED
+
+#===============================================================================
+# pimp --path <dir>   # examine path of directory in upward hierarchy
+#===============================================================================
+
+   if [ "$_SOURCED" != 0 ] && [ "$*" == "" ]; then
+      bash pimp              # pimp (create/consign/install) virtual environment
+      source pimp --activate # activate virtual environment
+
+      unset _SOURCED
+      return 0 2>/dev/null || exit 0  # safe return/exit
+   fi
+
+#===============================================================================
+# . pimp --activate   # locate and activate virtual environment
+#===============================================================================
+
+   if [ "$*" == "--activate" ]; then
+      if [ "$_SOURCED" == 0 ]; then
+         bash pimp ---r "error: pimp $*" >&2
+         echo      "     this command line must be sourced!" >&2
+         echo      "     => enter: source pimp --activate" >&2
+         unset _SOURCED
+         return 1 2>/dev/null || exit 1  # safe return/exit
+      fi
+
+      _VENV=`pimp --venv`
+      if [ "$_VENV" == "" ]; then
+         bash pimp ---r "error: pimp $*" >&2
+         echo      "       unable to locate virtual environment" >&2
+
+         unset _VENV
+         unset _SOURCED
+         return 1 2>/dev/null || exit 1  # safe return/exit
+      fi
+
+      source $_VENV/bin/activate
+
+      unset _VENV
+      unset _SOURCED
+      return 0 2>/dev/null || exit 0  # safe return/exit
+   fi
+
+#===============================================================================
+#===============================================================================
+# after here only non sourced execution is allowed
+#===============================================================================
+#===============================================================================
+
+    if [ "$_SOURCED" != 0 ]; then
+        pimp ---r "bad command line: source pimp $* (or: . pimp $*)"
+        echo      "    this command is not allowed to run in sourced mode!"
+        unset _SOURCED
+        return 1 2>/dev/null || exit 1  # safe return/exit
+    fi
 
 #===============================================================================
 # pimp --path <dir>   # examine path of directory in upward hierarchy
@@ -262,7 +328,7 @@ fi
       if [ "$VENV" == "" ]; then
          if [ -f .pimp/venv ]; then
             VENV=`cat .pimp/venv`
-            pimp ---g "virtual environment not existing!"
+            pimp ---y "virtual environment not existing!"
 
             read -p "shall I create virtual environment $VENV [Y/n]?" ANS
 				    if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then

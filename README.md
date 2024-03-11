@@ -2,7 +2,20 @@
 
 --------------------------------------------------------------------------------
 
-# Pimp
+# Pimping Virtual Environments
+
+## Curl Installation Formula
+
+In a `bash` shell with installed `curl` execute the following one-line command
+to download and install `pimp`. Select a number from the list of potential
+install directories (which are extracted from your PATH).
+
+```
+  curl -s https://raw.githubusercontent.com/bluccino/tools-pimp/master/bin/pimp >~pimp; bash ~pimp -!
+```
+
+
+## Pimp Basics
 
 `pimp` is a bash script to pimp a virtual (Python) environment in two
 aspects:
@@ -21,6 +34,68 @@ aspects:
     the virtual environment's binary folder, include the `setup` and `cleanup`
     scripts which the activation and deactivation should implicitely call.
 ~~~
+
+
+## Building Virtual Environments
+
+Since virtual environments should (usually) not be included in git repositories,
+they need to built and filled with Python packages and shell scripts according
+to a build recipe. `pimp` supports such build process controlled by recipe
+files located in a hidden `.pimp` directory. The command line below
+demonstrates a sample initialization of `.pimp` directory for building a
+virtual envioronment `@venv` with skeleton setup/cleanup scripts.
+
+```
+    $ pimp --init @venv  # init a .pimp folder for build-up of @venv
+    === initializing .pimp directory ...
+    $ tree .pimp
+    .pimp
+    ├── bin
+    │   ├── cleanup
+    │   └── setup
+    ├── consign
+    ├── deploy
+    └── venv
+```
+
+After `.pimp` is initialized, command `. pimp` creates virtual environment
+`@venv`, pimps the `@venv/bin/activate` script, installs scripts `setup` and
+`cleanup` and activates the virtual environment.
+
+```
+    path-to $ . pimp
+    virtual environment not existing!
+    shall I create virtual environment @venv [Y/n]?
+    === creating virtual environment @venv ...
+    === pimping @venv/bin/activate
+    === consigning files (=> /Users/hux/Bluenetics/Git/Tmp/.pimp/bin)
+    === copy consigned binaries to virtual environment
+    path-to/.pimp/bin/cleanup -> @venv/bin
+    path-to/.pimp/bin/setup -> @venv/bin
+    === pimping complete
+    === setup virtual environment ...
+    (@venv) path-to $
+```
+
+## Pimp and West
+
+In combination with the `west` tool, `pimp` can be used to install version
+controlled tools (versions are managed by `west`) in the virtual environment's
+binary folder, thus, making them accessible as long as the virtual environment
+is activated.
+
+if a `.west` directory is found in the current environment while command
+`. pimp` is invoked, `pimp` will automatically install the `west` Python
+package in the virtual environment. The following sequence is typical for the
+creation of `west` workspaces with virtual tool support (with tools only
+available during activation of the virtual environment).
+
+```
+    $ pimp --init @my-ws   # init .pimp for my workspace (@my-ws)
+    $ mkdir .west          # want also have west installed
+    $ . pimp               # build/setup/activate @my-ws and install west
+```
+
 
 
 ## Pre-Requisites
@@ -44,24 +119,6 @@ subfolder `bin`).
 
 ```
     $ git clone https://github.com/bluccino/tools-pimp  # see tools-pimp/bin/pimp
-```
-
-
-## Curl Installation Formula
-
-In a `bash` shell with installed `curl` execute the following command to
-download `pimp` to local file `./pimp`.
-
-```
-  curl -s https://raw.githubusercontent.com/bluccino/tools-pimp/master/bin/pimp >pimp;
-```
-
-After successful download set execution permissions and install `pimp` in a
-binary folder, which is recognized in `$PATH`.
-
-```
-    chmod +x pimp
-    cp pimp $BIN/   # or `sudo cp pimp $BIN/` with $BIN recognized in $PATH
 ```
 
 

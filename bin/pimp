@@ -11,6 +11,7 @@
       pimp ---g   "pimp virtual environment (version `pimp --version`)"
       pimp ---y   'usage: pimp [-ci?] [--<opt>] [<venv>] [<bin>]'
       echo        '  pimp                       # pimp, consign and install files in virtual environment'
+      echo        '  . pimp                     # pimp, consign, install and activate virtual environment'
       echo        '  pimp -c                    # consign files according to .pimp/consign list'
       echo        '  pimp -i                    # install consigned files in virtual environment'
       echo        '  pimp -d                    # consign and deploy binaries to $BIN directory'
@@ -21,8 +22,11 @@
       echo        '  pimp --version             # print version'
       if [ "$*" != "-?" ]; then
         pimp ---y "more commands"
+        echo      '  . pimp --activate          # locate and activate virtual environment'
+        echo      '  . pimp --activate @venv    # activate given virtual environment @venv'
         echo      '  pimp --check @venv         # check if @venv is already pimped'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
+        echo      '  pimp --init @venv          # init a .pimp directory with setup/cleanup samples'
         echo      '  pimp --install             # install pimp in $BIN directory'
         echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
         echo      '  pimp --path <dir>          # examine path of directory in upward hierarchy'
@@ -30,7 +34,8 @@
         echo      '  pimp --venv                # echo name of virtual environment directory'
         echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
       fi
-      exit  0
+
+      return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
 #===============================================================================
@@ -38,7 +43,118 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0"; exit 0
+      echo "1.0.0z";
+      return 0 2>/dev/null || exit 0  # safe return/exit
+   fi
+
+#===============================================================================
+# examine whether this script is running in sourced/unsourced mode
+# - note: each dispatching clause needs to unset _SOURCED
+#===============================================================================
+
+   (return 0 2>/dev/null) && _SOURCED=1 || _SOURCED=0  # determine _SOURCED
+
+#===============================================================================
+# pimp --path <dir>   # examine path of directory in upward hierarchy
+#===============================================================================
+
+   if [ "$_SOURCED" != 0 ] && [ "$*" == "" ]; then
+      bash pimp              # pimp (create/consign/install) virtual environment
+      source pimp --activate # activate virtual environment
+
+      unset _SOURCED
+      return 0 2>/dev/null || exit 0  # safe return/exit
+   fi
+
+#===============================================================================
+# . pimp --activate        # locate and activate virtual environment
+# . pimp --activate @venv  # activate given virtual environment
+#===============================================================================
+
+   if [ "$1" == "--activate" ] && [ "$3" == "" ]; then
+      if [ "$_SOURCED" == 0 ]; then
+         bash pimp ---r "error: pimp $*" >&2
+         echo      "     this command line must be sourced!" >&2
+         echo      "     => enter: source pimp --activate" >&2
+         unset _SOURCED
+         return 1 2>/dev/null || exit 1  # safe return/exit
+      fi
+
+      if [ "$2" == "" ]; then
+         _VENV=`pimp --venv`
+      else
+         _VENV=$2
+      fi
+
+      if [ ! -d "$_VENV" ]; then
+         bash pimp ---r "error: pimp $*" >&2
+         echo      "       unable to locate virtual environment" >&2
+
+         unset _VENV
+         unset _SOURCED
+         return 1 2>/dev/null || exit 1  # safe return/exit
+      fi
+
+      source $_VENV/bin/activate
+
+      unset _VENV
+      unset _SOURCED
+      return 0 2>/dev/null || exit 0  # safe return/exit
+   fi
+
+#===============================================================================
+#===============================================================================
+# after here only non sourced execution is allowed
+#===============================================================================
+#===============================================================================
+
+    if [ "$_SOURCED" != 0 ]; then
+        pimp ---r "bad command line: source pimp $* (or: . pimp $*)"
+        echo      "    this command is not allowed to run in sourced mode!"
+        unset _SOURCED
+        return 1 2>/dev/null || exit 1  # safe return/exit
+    fi
+
+#===============================================================================
+# pimp -!   # install in a system binary directory
+#===============================================================================
+
+   if [ "$*" == "-!" ]; then
+      if [ ! -f ~pimp ]; then
+         bash ~pimp ---r "error: pimp -!" >&2
+         echo      "       file ~pimp not found!" >&2
+         exit 1
+      fi
+
+      LIST=''
+      for CHUNK in $(echo "$PATH" | sed 's/:/ /g')
+      do
+         LIST="$LIST $CHUNK"
+      done
+
+      bash ~pimp ---y "select directory for installation of pimp:"
+	    select DIR in $LIST
+	    do
+         ERR="0"
+         touch $DIR/_junk_ >/dev/null || ERR="1"
+         rm -f $DIR/_junk_ >/dev/null
+
+         bash ~pimp ---g "=== installing pimp in $DIR ..."
+         if [ "$ERR" == "0" ]; then       # no write protection
+            bash ~pimp ---y "  cp ~pimp $DIR/pimp"
+            cp ~pimp $DIR/pimp || exit 1
+         else                             # write protection
+            bash ~pimp ---y "  this is a protected directory which uses a password!"
+            bash ~pimp ---y "  sudo cp ~pimp $DIR/pimp"
+            sudo cp ~pimp $DIR/pimp || exit 1
+         fi
+         bash ~pimp ---g "=== sucessful installation of pimp"
+         echo '  => enter: pimp -?   # to see usage'
+
+         rm -f ~pimp                      # cleanup
+ 	       exit 0
+	    done
+      exit 0
    fi
 
 #===============================================================================
@@ -98,6 +214,71 @@
       done
 
       chmod +x $PIMP/bin/*
+      exit 0
+   fi
+
+#===============================================================================
+# pimp --init @venv  # init a .pimp directory with setup/cleanup samples
+#===============================================================================
+
+   if [ "$1" == "--init" ] && [ "$3" == "" ]; then
+      VENV=$2
+      if [ "$VENV" == "" ]; then
+         pimp ---r "error: pimp $*" >&2
+         echo      "       missing arg2 (name of virtual environment to be created)" >&2
+         exit 1
+      fi
+
+      if [ -d ".pimp" ]; then
+         pimp ---r "error: pimp $*" >&2
+         echo      "       directory .pimp already existing (stop processing)" >&2
+         exit 1
+      fi
+
+      pimp ---g "=== initializing .pimp directory ..."
+         # make .pimp and .pimp/bin directories and provide .pimp/venv
+
+      mkdir .pimp || exit 1
+      PIMPBIN=.pimp/bin
+      mkdir $PIMPBIN || exit 1
+      echo $2 >.pimp/venv
+
+         # provide a setup sample
+
+      echo '#!/bin/bash' >$PIMPBIN/setup
+      echo '# setup (setup script for virtual environment)' >$PIMPBIN/setup
+      echo '' >$PIMPBIN/setup
+      echo "echo '=== setup virtual environment ...'" >$PIMPBIN/setup
+
+         # provide a cleanup sample
+
+      echo '#!/bin/bash' >$PIMPBIN/cleanup
+      echo '# setup (setup script for virtual environment)' >$PIMPBIN/cleanup
+      echo '' >$PIMPBIN/cleanup
+      echo "echo '=== cleanup virtual environment ...'" >$PIMPBIN/cleanup
+
+         # provide consign and deploy skeletons
+
+      touch .pimp/consign
+      touch .pimp/deploy
+
+         # add virtual environment name to .gitignore
+
+      if [ -d ".git" ]; then
+         if [ -f ".gitignore" ]; then
+            cat .gitignore | grep "$VENV" >/dev/null && exit 0  # nothing to do
+         fi
+
+         read -p "shall I add $VENV to .gitignore [Y/n]?" ANS
+ 		     if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
+				   exit 0
+				 fi
+
+         pimp ---g "=== adding $VENV to .gitignore"
+         echo '' >>.gitignore
+         echo '# virtual environment folder' >>.gitignore
+         echo "$VENV" >>.gitignore
+      fi
       exit 0
    fi
 
@@ -262,11 +443,11 @@ fi
       if [ "$VENV" == "" ]; then
          if [ -f .pimp/venv ]; then
             VENV=`cat .pimp/venv`
-            pimp ---g "virtual environment not existing!"
+            pimp ---y "virtual environment not existing!"
 
             read -p "shall I create virtual environment $VENV [Y/n]?" ANS
 				    if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
-				       exit 1
+				       exit 0
 				    fi
 
             if [ "`which python3`" == "" ]; then
@@ -309,6 +490,16 @@ fi
 	          echo "  $FILE -> $VENV/bin"
 	          cp $FILE $VENV/bin
 	       done
+      fi
+
+      if [ -d .west ]; then
+         pimp ---y ".west directory detected"
+         read -p "shall I install west in $VENV [Y/n]?" ANS
+				 if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
+            pimp ---g "=== installing west"
+            source $VENV/bin/activate
+            pip install west
+				 fi
       fi
 
 	    pimp ---g "=== pimping complete"
