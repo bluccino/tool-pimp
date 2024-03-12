@@ -45,7 +45,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0";
+      echo "1.0.1a";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -384,16 +384,16 @@
          # provide a setup sample
 
       echo '#!/bin/bash' >$PIMPBIN/setup
-      echo '# setup (setup script for virtual environment)' >$PIMPBIN/setup
-      echo '' >$PIMPBIN/setup
-      echo "echo '=== setup virtual environment ...'" >$PIMPBIN/setup
+      echo '# setup (setup script for virtual environment)' >>$PIMPBIN/setup
+      echo '' >>$PIMPBIN/setup
+      echo "echo '=== setup virtual environment ...'" >>$PIMPBIN/setup
 
          # provide a cleanup sample
 
       echo '#!/bin/bash' >$PIMPBIN/cleanup
-      echo '# setup (setup script for virtual environment)' >$PIMPBIN/cleanup
-      echo '' >$PIMPBIN/cleanup
-      echo "echo '=== cleanup virtual environment ...'" >$PIMPBIN/cleanup
+      echo '# setup (setup script for virtual environment)' >>$PIMPBIN/cleanup
+      echo '' >>$PIMPBIN/cleanup
+      echo "echo '=== cleanup virtual environment ...'" >>$PIMPBIN/cleanup
 
          # provide consign and deploy skeletons
 
