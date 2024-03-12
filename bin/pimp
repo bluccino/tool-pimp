@@ -26,7 +26,8 @@
         echo      '  . pimp --activate @venv    # activate given virtual environment @venv'
         echo      '  pimp --check @venv         # check if @venv is already pimped'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
-        echo      '  pimp --deploy              # deploy files in .pimp/deploy to binary system folder'
+        echo      '  pimp --deploy              # deploy files in .pimp/deploy into binary system folder'
+        echo      '  pimp --deploy <bin>        # deploy files in .pimp/deploy into given <bin> folder'
         echo      '  pimp --init @venv          # init a .pimp directory with setup/cleanup samples'
         echo      '  pimp --install             # install pimp in $BIN directory'
         echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
@@ -45,7 +46,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0";
+      echo "1.0.1a";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -230,10 +231,11 @@
    fi
 
 #===============================================================================
-# pimp --deploy   # tool deployment
+# pimp --deploy       # deploy files into .pimp/deploy to binary system folder'
+# pimp --deploy <bin> # deploy files into given <bin> folder'
 #===============================================================================
 
-   if [ "$*" == "--deploy" ]; then
+   if [ "$1" == "--deploy" ] && [ "$3" == "" ]; then
       if [ ! -f .pimp/deploy ]; then
          bash pimp ---r "error: pimp $*" >&2
          echo           "       no deployment list (file .pimp/deploy) provided" >&2
@@ -245,68 +247,81 @@
          exit 0
       fi
 
-      bash ~pimp ---y "select target directory for deployment:"
-      LIST=`pimp --directories`
-	    select BIN in $LIST
-	    do
-         ERR="0"
-         touch $BIN/_junk_ >/dev/null || ERR="1"
-         rm -f $BIN/_junk_ >/dev/null
+         # if arg2 is not provided we select target directory from a list
 
-            # first show deployment status
-
-         TOOLS=`pimp ---deploy-status $BIN`
-         if [ "$TOOLS" == "" ]; then
-            pimp ---g "everything up-to-date (no further deployment action)"
+      if [ "$2" == "" ]; then
+         bash pimp ---y "select target directory for deployment:"
+         LIST=`pimp --directories`
+	       select BIN in $LIST
+	       do
+            pimp --deploy $BIN
             exit 0
-         fi
+         done
+         exit 1
+      fi
 
-            # prompt to confirm deployment
+         # otherwise we use arg2 as target directory
 
-         pimp ---y "confirm deployment!"
-         read -p "go ahead [Y/n]?" ANS
- 		     if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
-				   exit 0
-				 fi
+      BIN=$2
 
-            # actual deployment
+         # we need to examine whether target directory is protected
 
-         bash ~pimp ---g "=== deploying tools in $BIN ..."
-         SRC=.pimp/bin
+      ERR="0"
+      touch $BIN/_junk_ >/dev/null || ERR="1"
+      rm -f $BIN/_junk_ >/dev/null
 
-			   for TOOL in $TOOLS
-			   do
-            FILE="${TOOL##*/}"
-			      VSRC=`bash $TOOL --version 2>/dev/null`
-			      VDST=`bash $BIN/$FILE --version 2>/dev/null`
+               # first show deployment status
 
-	          if [ "$VDST" == "" ] && [ ! -f $BIN/$FILE ]; then
-	             VDST='not installed'
-	          fi
-
-	          if [ "$VSRC" == "" ]; then VSRC='???'; fi
-	          if [ "$VDST" == "" ]; then VDST='???'; fi
-
-	          if [ "$VSRC" != '???' ] && [ "$VDST" != '???' ]; then
-	             if [ "$VSRC" != "$VDST" ]; then
-                  if [ "$ERR" == "0" ]; then
-   	                 echo "    cp $TOOL $BIN;  chmod +x $BIN/$FILE"
-	                   cp $TOOL $BIN;  chmod +x $BIN/$FILE
-                  else
-   	                 echo "    sudo cp $TOOL $BIN;  sudo chmod +x $BIN/$FILE"
-	                   sudo cp $TOOL $BIN;  sudo chmod +x $BIN/$FILE
-                  fi
-	             fi
-	          else
-	             pimp ---m "    note: not updating $TOOL"
-	             pimp ---m "          reason: missing version information ($VSRC => $VDST)"
-	             pimp ---m "          (you may manually delete the installed tool)"
-	          fi
-			   done
-
-         pimp ---g "=== deployment complete!"
+      TOOLS=`pimp ---deploy-status $BIN`
+      if [ "$TOOLS" == "" ]; then
+         pimp ---g "everything up-to-date (no further deployment action)"
          exit 0
-	    done
+      fi
+
+         # prompt to confirm deployment
+
+      pimp ---y "confirm deployment!"
+      read -p "go ahead [Y/n]?" ANS
+ 		  if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
+			   exit 0
+		  fi
+
+         # actual deployment
+
+      bash pimp ---g "=== deploying tools in $BIN ..."
+      SRC=.pimp/bin
+
+			for TOOL in $TOOLS
+			do
+         FILE="${TOOL##*/}"
+			   VSRC=`bash $TOOL --version 2>/dev/null`
+			   VDST=`bash $BIN/$FILE --version 2>/dev/null`
+
+	       if [ "$VDST" == "" ] && [ ! -f $BIN/$FILE ]; then
+	          VDST='not installed'
+	       fi
+
+	       if [ "$VSRC" == "" ]; then VSRC='???'; fi
+	       if [ "$VDST" == "" ]; then VDST='???'; fi
+
+	       if [ "$VSRC" != '???' ] && [ "$VDST" != '???' ]; then
+	          if [ "$VSRC" != "$VDST" ]; then
+               if [ "$ERR" == "0" ]; then
+   	              echo "    cp $TOOL $BIN;  chmod +x $BIN/$FILE"
+	                cp $TOOL $BIN;  chmod +x $BIN/$FILE
+               else
+   	              echo "    sudo cp $TOOL $BIN;  sudo chmod +x $BIN/$FILE"
+	                sudo cp $TOOL $BIN;  sudo chmod +x $BIN/$FILE
+               fi
+	          fi
+	       else
+	          pimp ---m "    note: not updating $TOOL"
+	          pimp ---m "          reason: missing version information ($VSRC => $VDST)"
+	          pimp ---m "          (you may manually delete the installed tool)"
+	       fi
+			done
+
+      pimp ---g "=== deployment complete!"
       exit 0
    fi
 
@@ -339,13 +354,13 @@
             TOOLS="$TOOLS $TOOL"
          fi
 
-         TOOLSTR=$TOOL':               '
+         TOOLSTR=$TOOL':                                   '
 
-         AVAIL="$VSRC"',              '
+         AVAIL="$VSRC"',                                  '
          if [ "$VSRC" != "$VDST" ]; then
-            pimp ---c "    ${TOOLSTR:0:10} available: ${AVAIL:0:10} current: $VDST" 1>&2
+            pimp ---c "    ${TOOLSTR:0:20} available: ${AVAIL:0:20} current: $VDST" 1>&2
          else
-            echo "    ${TOOLSTR:0:10} available: ${AVAIL:0:10} current: $VDST" 1>&2
+            echo "    ${TOOLSTR:0:20} available: ${AVAIL:0:20} current: $VDST" 1>&2
          fi
       done
 
@@ -384,16 +399,16 @@
          # provide a setup sample
 
       echo '#!/bin/bash' >$PIMPBIN/setup
-      echo '# setup (setup script for virtual environment)' >$PIMPBIN/setup
-      echo '' >$PIMPBIN/setup
-      echo "echo '=== setup virtual environment ...'" >$PIMPBIN/setup
+      echo '# setup (setup script for virtual environment)' >>$PIMPBIN/setup
+      echo '' >>$PIMPBIN/setup
+      echo "echo '=== setup virtual environment ...'" >>$PIMPBIN/setup
 
          # provide a cleanup sample
 
       echo '#!/bin/bash' >$PIMPBIN/cleanup
-      echo '# setup (setup script for virtual environment)' >$PIMPBIN/cleanup
-      echo '' >$PIMPBIN/cleanup
-      echo "echo '=== cleanup virtual environment ...'" >$PIMPBIN/cleanup
+      echo '# setup (setup script for virtual environment)' >>$PIMPBIN/cleanup
+      echo '' >>$PIMPBIN/cleanup
+      echo "echo '=== cleanup virtual environment ...'" >>$PIMPBIN/cleanup
 
          # provide consign and deploy skeletons
 
