@@ -97,6 +97,47 @@ available during activation of the virtual environment).
 ```
 
 
+## Pimp and West
+
+`west` can be used in general for workspaces which are not related to Zephyr, but
+most `west` applications are related to Zephyr. One specific use case of pimp is
+to modify a virtual environment of a west workspace containing the zephyr tree.
+A specific task is to set the environment variable `ZEPHYR_BASE`, when the
+virtual environment is activated, and to unset in the deactivation case
+(setting ZEPHYR_BASE is vital for bilding freestanding applications). In such
+use case the pimp can automatically prepare proper `setup`/`cleanup` scripts.
+
+```
+    #!/bin/bash
+    # setup (setup script for virtual environment)
+
+    echo '=== setup virtual environment ...'
+    export ZEPHYR_BASE=/path-to/zephyr
+```
+
+```
+		#!/bin/bash
+		# cleanup (cleanup script for virtual environment)
+
+		echo '=== cleanup virtual environment ...'
+		unset ZEPHYR_BASE
+```
+
+Pimp has a special feature (option `--zephyr`) to pimp a virtual environment
+of a west/zephyr workspace which is demonstrated in the following example,
+showcasing installation of Zephyr version 3.6.0
+
+```
+    ... $ mkdir z3.5.0; cd z3.5.0
+    z3.5.0 $ pimp --init @z3.5.0              # init .pimp with setup/cleanup scripts
+    z3.5.0 $ pimp --zephyr                    # extend setup/cleanup for zephyr
+    z3.5.0 $ . pimp                           # create/pimp/activate virtual environment
+    (@z3.5.0) z3.5.0 $ pip install west       # install west (Python) package in @z3.5.0
+    (@z3.5.0) z3.5.0 $ west init -mr v3.5.0   # init for specific version
+    (@z3.6.0) z3.6.0 $ west update            # update zephyr installation
+```
+
+
 
 ## Pre-Requisites
 

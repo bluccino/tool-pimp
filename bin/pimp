@@ -26,6 +26,7 @@
         echo      '  . pimp --activate @venv    # activate given virtual environment @venv'
         echo      '  pimp --check @venv         # check if @venv is already pimped'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
+        echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
         echo      '  pimp --deploy              # deploy files in .pimp/deploy into binary system folder'
         echo      '  pimp --deploy <bin>        # deploy files in .pimp/deploy into given <bin> folder'
         echo      '  pimp --init @venv          # init a .pimp directory with setup/cleanup samples'
@@ -35,7 +36,7 @@
         echo      '  pimp --pimp                # actually pimp'
         echo      '  pimp --update              # update current pimp installation to latest version'
         echo      '  pimp --venv                # echo name of virtual environment directory'
-        echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
+        echo      '  pimp --zephyr              # pimp virtual environment for zephyr'
       fi
 
       return 0 2>/dev/null || exit 0  # safe return/exit
@@ -406,7 +407,7 @@
          # provide a cleanup sample
 
       echo '#!/bin/bash' >$PIMPBIN/cleanup
-      echo '# setup (setup script for virtual environment)' >>$PIMPBIN/cleanup
+      echo '# setup (cleanup script for virtual environment)' >>$PIMPBIN/cleanup
       echo '' >>$PIMPBIN/cleanup
       echo "echo '=== cleanup virtual environment ...'" >>$PIMPBIN/cleanup
 
@@ -546,7 +547,7 @@ fi\
 fi
 
 #===============================================================================
-# helper: pimp --venv   # locate virtual environment folder
+# pimp --venv   # locate virtual environment folder
 #===============================================================================
 
    if [ "$*" == "--venv" ]; then
@@ -561,6 +562,40 @@ fi
          fi
       done
       exit 1
+   fi
+
+#===============================================================================
+# pimp --zephyr   # pimp virtual environment for zephyr
+#===============================================================================
+
+   if [ "$*" == "--zephyr" ]; then
+      if [ ! -d ".pimp" ]; then
+         pimp ---r "error: pimp $*" >&2
+         echo      "       missing .pimp directory" >&2
+         echo      "       => consider: pimp --init <venv>" >&2
+         exit 1
+      fi
+      if [ ! -f ".pimp/bin/setup" ]; then
+         pimp ---r "error: pimp $*" >&2
+         echo      "       missing .pimp/bin/setup script" >&2
+         exit 1
+      fi
+      if [ ! -f ".pimp/bin/cleanup" ]; then
+         pimp ---r "error: pimp $*" >&2
+         echo      "       missing .pimp/bin/cleanup script" >&2
+         exit 1
+      fi
+
+      pimp ---g "=== pimping .pimp for zephyr"
+
+      echo '' >>.pimp/bin/setup
+      echo '# setting ZEPHYR_BASE' >>.pimp/bin/setup
+      echo "export ZEPHYR_BASE=`pwd`/zephyr" >>.pimp/bin/setup
+
+      echo '' >>.pimp/bin/cleanup
+      echo '# unsetting ZEPHYR_BASE' >>.pimp/bin/cleanup
+      echo "unset ZEPHYR_BASE" >>.pimp/bin/cleanup
+      exit 0
    fi
 
 #===============================================================================
