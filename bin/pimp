@@ -15,7 +15,7 @@
       echo        '  pimp -c                    # consign files according to .pimp/consign list'
       echo        '  pimp -i                    # install consigned files in virtual environment'
       echo        '  pimp -d                    # consign and deploy binaries to $BIN directory'
-      echo        '  pimp @venv                 # pimp @venv to support setup/teardown'
+      echo        '  pimp @venv                 # pimp @venv to support setup/cleanup'
       echo        '  pimp @venv .pimp/bin       # also install binaries of .pimp/bin in @venv'
       echo        '  pimp -?                    # show usage'
       echo        '  pimp --help                # comprehensive help'
@@ -47,7 +47,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0";
+      echo "1.0.0c";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -399,17 +399,17 @@
 
          # provide a setup sample
 
-      echo '#!/bin/bash' >$PIMPBIN/setup
-      echo '# setup (setup script for virtual environment)' >>$PIMPBIN/setup
-      echo '' >>$PIMPBIN/setup
-      echo "echo '=== setup virtual environment ...'" >>$PIMPBIN/setup
+      echo '#!/bin/bash' >$PIMPBIN/setup.sh
+      echo '# setup (setup script for virtual environment)' >>$PIMPBIN/setup.sh
+      echo '' >>$PIMPBIN/setup.sh
+      echo "echo '=== setup virtual environment ...'" >>$PIMPBIN/setup.sh
 
          # provide a cleanup sample
 
-      echo '#!/bin/bash' >$PIMPBIN/cleanup
-      echo '# setup (cleanup script for virtual environment)' >>$PIMPBIN/cleanup
-      echo '' >>$PIMPBIN/cleanup
-      echo "echo '=== cleanup virtual environment ...'" >>$PIMPBIN/cleanup
+      echo '#!/bin/bash' >$PIMPBIN/cleanup.sh
+      echo '# setup (cleanup script for virtual environment)' >>$PIMPBIN/cleanup.sh
+      echo '' >>$PIMPBIN/cleanup.sh
+      echo "echo '=== cleanup virtual environment ...'" >>$PIMPBIN/cleanup.sh
 
          # provide consign and deploy skeletons
 
@@ -497,7 +497,7 @@
       fi
 
       FOUND="1"
-      cat $ACTIVATE | grep /bin/setup >/dev/null || FOUND="0"
+      cat $ACTIVATE | grep /bin/setup.sh >/dev/null || FOUND="0"
       if [ $FOUND == "1" ]; then
          pimp ---y "no action: $ACTIVATE is already pimped"
          exit 0
@@ -518,8 +518,8 @@
     ACTIVATE=$2
     echo '' >>$ACTIVATE
     echo '# custom setup' >>$ACTIVATE
-    echo 'if [ -f "$VIRTUAL_ENV/bin/setup" ]; then' >>$ACTIVATE
-    echo '  source $VIRTUAL_ENV/bin/setup' >>$ACTIVATE
+    echo 'if [ -f "$VIRTUAL_ENV/bin/setup.sh" ]; then' >>$ACTIVATE
+    echo '  source $VIRTUAL_ENV/bin/setup.sh' >>$ACTIVATE
     echo 'fi' >>$ACTIVATE
     exit 0
   fi
@@ -537,10 +537,10 @@ if [ "$1" == '---pimp-cleanup' ] && [ "$2" != "" ] && [ "$3" == "" ]; then
 fi\
     ' $ACTIVATE.tmp >$ACTIVATE
   sed '/deactivate ()/  a\
-    source $VIRTUAL_ENV/bin/cleanup\
+    source $VIRTUAL_ENV/bin/cleanup.sh\
     ' $ACTIVATE > $ACTIVATE.tmp
   sed '/deactivate ()/  a\
-    if [ -f "$VIRTUAL_ENV/bin/cleanup" ]; then\
+    if [ -f "$VIRTUAL_ENV/bin/cleanup.sh" ]; then\
     ' $ACTIVATE.tmp > $ACTIVATE
   rm $ACTIVATE.tmp
   exit 0
@@ -575,26 +575,26 @@ fi
          echo      "       => consider: pimp --init <venv>" >&2
          exit 1
       fi
-      if [ ! -f ".pimp/bin/setup" ]; then
+      if [ ! -f ".pimp/bin/setup.sh" ]; then
          pimp ---r "error: pimp $*" >&2
-         echo      "       missing .pimp/bin/setup script" >&2
+         echo      "       missing .pimp/bin/setup.sh script" >&2
          exit 1
       fi
-      if [ ! -f ".pimp/bin/cleanup" ]; then
+      if [ ! -f ".pimp/bin/cleanup.sh" ]; then
          pimp ---r "error: pimp $*" >&2
-         echo      "       missing .pimp/bin/cleanup script" >&2
+         echo      "       missing .pimp/bin/cleanup.sh script" >&2
          exit 1
       fi
 
       pimp ---g "=== pimping .pimp for zephyr"
 
-      echo '' >>.pimp/bin/setup
-      echo '# setting ZEPHYR_BASE' >>.pimp/bin/setup
-      echo "export ZEPHYR_BASE=`pwd`/zephyr" >>.pimp/bin/setup
+      echo '' >>.pimp/bin/setup.sh
+      echo '# setting ZEPHYR_BASE' >>.pimp/bin/setup.sh
+      echo "export ZEPHYR_BASE=`pwd`/zephyr" >>.pimp/bin/setup.sh
 
-      echo '' >>.pimp/bin/cleanup
-      echo '# unsetting ZEPHYR_BASE' >>.pimp/bin/cleanup
-      echo "unset ZEPHYR_BASE" >>.pimp/bin/cleanup
+      echo '' >>.pimp/bin/cleanup.sh
+      echo '# unsetting ZEPHYR_BASE' >>.pimp/bin/cleanup.sh
+      echo "unset ZEPHYR_BASE" >>.pimp/bin/cleanup.sh
       exit 0
    fi
 
