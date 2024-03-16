@@ -1,0 +1,8 @@
+manifest:
+  version: 0.8
+
+  projects:
+    - name: echo-colored-text
+      url: https://github.com/bluccino/tool-ec.git
+      revision: 1.0.0
+      path: deps/tool-ec

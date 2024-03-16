@@ -1,5 +1,2 @@
 bin/pimp
-bin/setup
-bin/cleanup
-bin/help
-tools/bin/ec
+deps/tool-ec/bin/ec

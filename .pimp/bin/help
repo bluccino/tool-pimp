@@ -1,0 +1,8 @@
+#!/bin/bash
+# help (local help on workspace @pimp)
+
+ec -g "help on workspace @pimp"
+echo  "  ec        echo colored text"
+echo  "  ve        activate virtual environment (persistent)"
+echo  "  de        deactivate virtual environment (persistent)"
+echo  "  clean     clean workspace"
