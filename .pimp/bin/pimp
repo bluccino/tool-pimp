@@ -49,7 +49,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0h";
+      echo "1.0.0r";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -730,8 +730,9 @@ fi
 # pimp   # pimp, consign and install files in virtual environment
 #===============================================================================
 
-   if [ "$*" == "" ]; then
+   if [ "$*" == "" ] || [ "$*" == "---standard" ]; then
       PIMP=.pimp
+      ROOT=`pwd`
       VENV=`pimp --venv`
 
          # check existence of virtual environment, and occasionally create
@@ -739,7 +740,7 @@ fi
       if [ "$VENV" == "" ]; then
          if [ -f $PIMP/venv ]; then
             VENV=`cat $PIMP/venv`
-            pimp ---y "virtual environment not existing!"
+            pimp ---c "virtual environment not existing!"
 
             read -p "shall I create virtual environment $VENV [Y/n]?" ANS
 				    if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
@@ -766,10 +767,6 @@ fi
 
       pimp --pimp
 
-         # next we consign the binaries
-
-      pimp --consign || exit
-
          # copy consigned binaries to virtual environment
 
       pimp ---g "=== copy consigned binaries to virtual environment"
@@ -788,14 +785,47 @@ fi
 	       done
       fi
 
-      if [ -d .west ]; then
-         pimp ---y ".west directory detected"
-         read -p "shall I install west in $VENV [Y/n]?" ANS
+      if [ -f $ROOT/manifest/west.yml ] || [ -d $ROOT/.west ]; then
+         INSTALLED="1"
+         which west | grep `pimp --venv` >/dev/null || INSTALLED="0"
+         if [ "$INSTALLED" == "0" ]; then
+            pimp ---c "west not installed in $VENV"
+            read -p "shall I install west in $VENV [Y/n]?" ANS
+				    if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
+               pimp ---g "=== installing west"
+               pimp ---y "source $VENV/bin/activate"
+               source $VENV/bin/activate
+               pimp ---y "pip install west"
+               pip install west
+				    fi
+         fi
+      fi
+
+      if [ -f $ROOT/manifest/west.yml ] && [ ! -d $ROOT/.west ]; then
+         pimp ---c "west manifest file (manifest/west.yml) detected!"
+         read -p "shall I init west workspace [Y/n]?" ANS
 				 if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
-            pimp ---g "=== installing west"
-            source $VENV/bin/activate
-            pip install west
-				 fi
+            pimp ---y "west init --local $ROOT/manifest"
+            west init --local $ROOT/manifest
+		     fi
+
+         pimp ---c "workspace should be updated!"
+         read -p "shall I update west workspace [Y/n]?" ANS
+				 if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
+            pimp ---y "west update"
+            west update
+		     fi
+      fi
+
+         # next we consign the binaries
+
+      if [ -f $ROOT/.pimp/consign ]; then
+         pimp ---c "there is a consignment file (.pimp/consign)"
+         read -p "shall I consign the binaries to $VENV [Y/n]?" ANS
+ 		     if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
+            pimp ---y "pimp --consign"
+            pimp --consign || exit
+		     fi
       fi
 
 	    pimp ---g "=== pimping complete"

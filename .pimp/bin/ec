@@ -1,7 +1,13 @@
 #!/bin/bash
 # ec: echo args with color options
+# Copyright (c) 2024 Bluenetics GmbH
+# SPDX-License-Identifier: Apache-2.0
 
-  if [ "$*" == "-?" ] || [ "$*" == "--help" ]; then
+#===============================================================================
+# ec -?;  ec --help   # print usage / comprehensive helü
+#===============================================================================
+
+  if [ "$*" == "-?" ] || [ "$*" == "--help" ] || [ "$*" == "--?" ]; then
     echo '  usage: ec ...         # (uncolored) echo ...'
     echo '         ec -r ...      # (red)'
     echo '         ec -g ...      # (green)'
@@ -30,8 +36,8 @@
 # print version: gic --version
 #===============================================================================
 
-   if [ "$*" == "--version" ]; then
-      echo "1.0.1"; exit 0
+   if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
+      echo "1.0.0"; exit 0
    fi
 
 #===============================================================================

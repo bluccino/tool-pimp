@@ -39,6 +39,14 @@
 				 fi
       fi
 
+      if [ -d $_ROOT/.west ]; then
+         read -p "delete .west directory [Y/n] ($_ROOT/.west)?" _ANS
+			   if [ "$_ANS" == "Y" ] || [ "$_ANS" == "y" ] || [ "$_ANS" == "" ]; then
+            ec -g "=== remove $_ROOT/.west"
+			      rm -rf $_ROOT/.west
+			   fi
+      fi
+
       if [ -d $_ROOT/@pimp ]; then
          read -p "delete virtual enviroment directory @pimp [Y/n] ($_ROOT/@pimp)?" _ANS
 			   if [ "$_ANS" == "Y" ] || [ "$_ANS" == "y" ] || [ "$_ANS" == "" ]; then
@@ -47,14 +55,6 @@
 			      rm -rf $_ROOT/@pimp
 			   fi
 			fi
-
-      if [ -d $_ROOT/.west ]; then
-         read -p "delete .west directory [Y/n] ($_ROOT/.west)?" _ANS
-			   if [ "$_ANS" == "Y" ] || [ "$_ANS" == "y" ] || [ "$_ANS" == "" ]; then
-            ec -g "=== remove $_ROOT/.west"
-			      rm -rf $_ROOT/.west
-			   fi
-      fi
 
       unset _ANS
       unset _ROOT
