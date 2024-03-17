@@ -733,6 +733,9 @@ fi
          chmod +x $PIMP
       fi
 
+      echo rm -f ~pimp
+      rm -f ~pimp
+
       pimp ---g "pimp update complete (version `pimp --version`)"
 	    exit 0
 	 fi
