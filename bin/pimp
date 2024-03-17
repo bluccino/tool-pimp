@@ -141,7 +141,7 @@
       chmod +x ~pimp
 
       bash ~pimp ---y "select target directory for installation of pimp:"
-      LIST=`pimp --directories`
+      LIST=`~pimp --directories`
 	    select DIR in $LIST
 	    do
          ERR="0"
