@@ -4,4 +4,5 @@
 echo '=== cleanup virtual environment ...'
 unalias de
 #unalias ve  # intentionally commented
+unalias clean
 unalias ?
