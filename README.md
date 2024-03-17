@@ -167,7 +167,7 @@ subfolder `bin`).
 
 In this tutorial let us consider the following tasks:
 
-* creation of a workspace folder `my-ws ` with virtual environment folder `@my-ws`
+* creation of a workspace folder `my-ws` with virtual environment folder `@my-ws`
 * on activation of `@venv` a message 'hello, @my-ws' shall be printed,
   and an alias `la` shall be defined as `ls -a`.  
 * on deactivation of `@venv` a message 'good bye, @my-env' shall be printed,
