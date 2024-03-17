@@ -18,6 +18,7 @@
       echo        '  pimp -i                    # init a .pimp directory'
       echo        '  pimp -i @venv              # init a .pimp dir for @venv with setup/cleanup samples'
       echo        '  pimp -m                    # init a sample west manifest directory'
+      echo        '  pimp -z                    # pimp virtual environment for zephyr'
       echo        '  pimp -?                    # show usage'
       echo        '  pimp --help                # comprehensive help'
       echo        '  pimp --version             # print version'
@@ -636,7 +637,7 @@ fi
 # pimp --zephyr   # pimp virtual environment for zephyr
 #===============================================================================
 
-   if [ "$*" == "--zephyr" ]; then
+   if [ "$*" == "--zephyr" ] || [ "$*" == "-z" ]; then
       PIMP=`pimp --path .pimp`
       if [ "$PIMP" == "" ]; then
          bash pimp ---r "error: pimp $*" >&2
