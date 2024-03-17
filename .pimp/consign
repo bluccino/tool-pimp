@@ -1,6 +1,4 @@
 bin/pimp
 bin/help
-bin/setup.sh
-bin/cleanup.sh
 bin/clean.sh
 deps/tool-ec/bin/ec

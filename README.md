@@ -17,21 +17,21 @@ install directories (which are extracted from your PATH).
 
 ## Pimp Basics
 
-`pimp` is a bash script to pimp a virtual (Python) environment in two
+`pimp` is a `bash` script to pimp a virtual (Python) environment in two
 aspects:
 
 * modifying the `activate` script of the virtual python environment in order
-  to source a setup script at the end of the activation process, and modifying
+  to source a `setup.sh` script at the end of the activation process, and modifying
   the deactivate function (which the activation installs) in order to source
-  a `cleanup` script before the actual deactivation
+  a `cleanup.sh` script before the actual deactivation
 
 * optionally adding executable binary files (typically bash scripts) to the
   virtual environment's binary folder, which are only available as long as the
   virtual environment is activate.
 
 ~~~
-    NOTE: In a typical scenario the set of binary files, which are copied to
-    the virtual environment's binary folder, include the `setup` and `cleanup`
+    NOTE: In a typical scenario the set of binary files, which are copied to the
+    virtual environment's binary folder, include the `setup.sh` and `cleanup.sh`
     scripts which the activation and deactivation should implicitely call.
 ~~~
 
@@ -39,7 +39,7 @@ aspects:
 ## Building Virtual Environments
 
 Since virtual environments should (usually) not be included in git repositories,
-they need to built and filled with Python packages and shell scripts according
+they need to be built and filled with Python packages and shell scripts according
 to a build recipe. `pimp` supports such build process controlled by recipe
 files located in a hidden `.pimp` directory. The command line below
 demonstrates a sample initialization of `.pimp` directory for building a
@@ -51,8 +51,8 @@ virtual envioronment `@venv` with skeleton setup/cleanup scripts.
     $ tree .pimp
     .pimp
     ├── bin
-    │   ├── cleanup
-    │   └── setup
+    │   ├── cleanup.sh
+    │   └── setup.sh
     ├── consign
     ├── deploy
     └── venv
