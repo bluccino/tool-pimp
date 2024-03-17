@@ -56,6 +56,8 @@
 			   fi
 			fi
 
+      rm -rf $_ROOT/test/build
+
       unset _ANS
       unset _ROOT
       return 0 2>/dev/null || exit 0  # safe return/exit

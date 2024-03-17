@@ -12,7 +12,7 @@
       echo  '  clean              # clean workspace (deps, @pimp, .west)'
       echo  '  clean -?           # show usage'
       echo  '  clean --version    # print version'
-      exit 0
+      return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
 #===============================================================================
@@ -29,26 +29,38 @@
 #===============================================================================
 
    if [ "$*" == "" ]; then
-      PIMP=`pimp --path .pimp`
-      ROOT=$(dirname $PIMP)
+      _ROOT=$(dirname `pimp --path .pimp`)
 
-      read -p "delete deps directory [Y/n] ($ROOT/deps)?" ANS
-			if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
-			   rm -rf $ROOT/deps
+      if [ -d $_ROOT/deps ]; then
+	       read -p "delete deps directory [Y/n] ($_ROOT/deps)?" _ANS
+				 if [ "$_ANS" == "Y" ] || [ "$_ANS" == "y" ] || [ "$_ANS" == "" ]; then
+            ec -g "=== remove $_ROOT/deps"
+				    rm -rf $_ROOT/deps
+				 fi
+      fi
+
+      if [ -d $_ROOT/.west ]; then
+         read -p "delete .west directory [Y/n] ($_ROOT/.west)?" _ANS
+			   if [ "$_ANS" == "Y" ] || [ "$_ANS" == "y" ] || [ "$_ANS" == "" ]; then
+            ec -g "=== remove $_ROOT/.west"
+			      rm -rf $_ROOT/.west
+			   fi
+      fi
+
+      if [ -d $_ROOT/@pimp ]; then
+         read -p "delete virtual enviroment directory @pimp [Y/n] ($_ROOT/@pimp)?" _ANS
+			   if [ "$_ANS" == "Y" ] || [ "$_ANS" == "y" ] || [ "$_ANS" == "" ]; then
+            ec -g "=== deactivate and remove $_ROOT/@pimp"
+            deactivate
+			      rm -rf $_ROOT/@pimp
+			   fi
 			fi
 
-      read -p "delete virtual enviroment directory @pimp [Y/n] ($ROOT/@pimp)?" ANS
-			if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
-			   rm -rf $ROOT/@pimp
-         deactivate
-			fi
+      rm -rf $_ROOT/test/build
 
-      read -p "delete .west directory [Y/n] ($ROOT/.west)?" ANS
-			if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
-			   rm -rf $ROOT/.west
-			fi
-
-      exit 0
+      unset _ANS
+      unset _ROOT
+      return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
 #===============================================================================
