@@ -549,6 +549,9 @@
       echo '      revision: 1.0.0' >>$WEST || exit 1
       echo '      path: deps/tool-ec' >>$WEST || exit 1
 
+      pimp ---g "=== add deps/tool-ec/bin/ec to consign list"
+      echo 'deps/tool-ec/bin/ec' >>$PIMP/consign
+
       pimp ---g "=== west manifest skeleton file (manifest/west.yml) created!"
       exit 0
    fi
