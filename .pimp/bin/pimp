@@ -49,7 +49,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0r";
+      echo "1.0.0";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -64,12 +64,18 @@
 # pimp --path <dir>   # examine path of directory in upward hierarchy
 #===============================================================================
 
-   if [ "$_SOURCED" != 0 ] && [ "$*" == "" ]; then
-      bash pimp              # pimp (create/consign/install) virtual environment
-      source pimp --activate # activate virtual environment
+   if [ "$*" == "" ]; then
+      if [ "$_SOURCED" != 0 ]; then
+         bash pimp ---all  # pimp (create/consign/install) virtual environment
+         source pimp --activate # activate virtual environment
 
-      unset _SOURCED
-      return 0 2>/dev/null || exit 0  # safe return/exit
+         unset _SOURCED
+         return 0 2>/dev/null || exit 0  # safe return/exit
+      else
+         bash pimp ---r "error: pimp $*" >&2
+         echo           "       source this command line! ('source pimp' or '. pimp')" >&2
+         return 1 2>/dev/null || exit 1  # safe return/exit
+      fi
    fi
 
 #===============================================================================
@@ -727,10 +733,10 @@ fi
 	 fi
 
 #===============================================================================
-# pimp   # pimp, consign and install files in virtual environment
+# pimp ---all   # pimp, consign and install files in virtual environment
 #===============================================================================
 
-   if [ "$*" == "" ] || [ "$*" == "---standard" ]; then
+   if [ "$*" == "---all" ]; then
       PIMP=.pimp
       ROOT=`pwd`
       VENV=`pimp --venv`
@@ -767,27 +773,15 @@ fi
 
       pimp --pimp
 
-         # copy consigned binaries to virtual environment
-
-      pimp ---g "=== copy consigned binaries to virtual environment"
-      PIMP=`pimp --path .pimp`
-
-      if [ "$PIMP" == "" ]; then
-         pimp ---r "error: unable to locate .pimp directory" >&2
-         exit 1
-      fi
-
-      if [ -d "$PIMP/bin" ]; then
-  	     for FILE in $PIMP/bin/*
-	       do
-	          echo "  $FILE -> $VENV/bin"
-	          cp $FILE $VENV/bin
-	       done
-      fi
+         # optional operations regarding west
 
       if [ -f $ROOT/manifest/west.yml ] || [ -d $ROOT/.west ]; then
          INSTALLED="1"
+         OLD=$PATH
+         PATH=$VENV/bin:$PATH
          which west | grep `pimp --venv` >/dev/null || INSTALLED="0"
+         PATH=$OLD
+
          if [ "$INSTALLED" == "0" ]; then
             pimp ---c "west not installed in $VENV"
             read -p "shall I install west in $VENV [Y/n]?" ANS
@@ -821,10 +815,28 @@ fi
 
       if [ -f $ROOT/.pimp/consign ]; then
          pimp ---c "there is a consignment file (.pimp/consign)"
-         read -p "shall I consign the binaries to $VENV [Y/n]?" ANS
+         read -p "shall I consign binaries and install in $VENV [Y/n]?" ANS
  		     if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
             pimp ---y "pimp --consign"
             pimp --consign || exit
+
+               # copy consigned binaries to virtual environment
+
+            pimp ---g "=== copy consigned binaries to virtual environment"
+            PIMP=`pimp --path .pimp`
+
+            if [ "$PIMP" == "" ]; then
+               pimp ---r "error: unable to locate .pimp directory" >&2
+               exit 1
+            fi
+
+            if [ -d "$PIMP/bin" ]; then
+  	           for FILE in $PIMP/bin/*
+	             do
+	                echo "  $FILE -> $VENV/bin"
+	                cp $FILE $VENV/bin
+	             done
+            fi
 		     fi
       fi
 
