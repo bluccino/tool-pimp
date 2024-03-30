@@ -559,9 +559,10 @@
 
 #===============================================================================
 # pimp --pimp   # actually pimp virtual environment
+# pimp -p       # actually pimp virtual environment
 #===============================================================================
 
-   if [ "$*" == "--pimp" ]; then
+   if [ "$*" == "--pimp" ] || [ "$*" == "-p" ]; then
       ACTIVATE=`pimp --venv`/bin/activate
 
       if [ ! -f "$ACTIVATE" ]; then
