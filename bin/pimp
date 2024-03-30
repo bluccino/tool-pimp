@@ -11,13 +11,14 @@
       pimp ---g   "pimp virtual environment (version `pimp --version`)"
       pimp ---y   'usage: pimp [-dimz?] [--<opt>] [<venv>] [<bin>]'
       echo        '  . pimp                     # pimp, consign, install and activate virtual environment'
-      echo        '  pimp @venv                 # pimp @venv to support setup/cleanup'
-      echo        '  pimp @venv .pimp/bin       # also install binaries of .pimp/bin in @venv'
+      #echo       '  pimp @venv                 # pimp @venv to support setup/cleanup'
+      #echo       '  pimp @venv .pimp/bin       # also install binaries of .pimp/bin in @venv'
       echo        '  pimp -d                    # deploy files in .pimp/deploy into binary system folder'
       echo        '  pimp -d <bin>              # deploy files in .pimp/deploy into given <bin> folder'
       echo        '  pimp -i                    # init a .pimp directory'
       echo        '  pimp -i @venv              # init a .pimp dir for @venv with setup/cleanup samples'
       echo        '  pimp -m                    # init a sample west manifest directory'
+      echo        '  pimp -p                    # actually pimp'
       echo        '  pimp -z                    # pimp virtual environment for zephyr'
       echo        '  pimp -?                    # show usage'
       echo        '  pimp --help                # comprehensive help'
@@ -51,7 +52,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0";
+      echo "1.0.0b";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
