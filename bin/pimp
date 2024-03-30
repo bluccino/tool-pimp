@@ -51,7 +51,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0";
+      echo "1.0.0a";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -829,7 +829,7 @@ fi
          read -p "shall I consign binaries and install in $VENV [Y/n]?" ANS
  		     if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
             pimp ---y "pimp --consign"
-            pimp --consign || exit
+            pimp --consign || exit 1
 
                # copy consigned binaries to virtual environment
 
@@ -849,6 +849,11 @@ fi
 	             done
             fi
 		     fi
+      fi
+
+      if [ -f $ROOT/.pimp/init.sh ]; then
+         pimp ---g "=== run .pimp/init.sh to post initialize virtual environment"
+         bash $ROOT/.pimp/init.sh || exit 1
       fi
 
 	    pimp ---g "=== pimping complete"
