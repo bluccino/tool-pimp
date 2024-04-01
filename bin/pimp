@@ -364,8 +364,8 @@
       BIN=$2
       SRC=$PIMP/bin
 
-      ec -g "deployment status:" 1>&2
-      ec -y "tools to be deployed into $BIN:" 1>&2
+      pimp ---g "deployment status:" 1>&2
+      pimp ---y "tools to be deployed into $BIN:" 1>&2
 
       TOOLS=''
       for TOOL in `cat $PIMP/deploy`
