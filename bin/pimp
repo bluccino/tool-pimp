@@ -19,7 +19,7 @@
       echo        '  pimp -i                    # init a .pimp directory'
       echo        '  pimp -i @venv              # init a .pimp dir for @venv with setup/cleanup samples'
       echo        '  pimp -m                    # init a sample west manifest directory'
-      echo        '  pimp -p                    # actually pimp'
+      echo        '  pimp -p                    # actually pimp activate script'
       echo        '  pimp -z                    # pimp virtual environment for zephyr'
       echo        '  pimp -?                    # show usage'
       echo        '  pimp --help                # comprehensive help'
