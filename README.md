@@ -39,11 +39,11 @@ aspects:
 ## Building Virtual Environments
 
 Since virtual environments should (usually) not be included in git repositories,
-they need to be built and filled with Python packages and shell scripts according
+they need to be built and setup with Python packages and shell scripts according
 to a build recipe. `pimp` supports such build process controlled by recipe
 files located in a hidden `.pimp` directory. The command line below
 demonstrates a sample initialization of `.pimp` directory for building a
-virtual envioronment `@venv` with skeleton setup/cleanup scripts.
+virtual envioronment `@venv` with skeleton `setup.sh`/`cleanup.sh` scripts.
 
 ```
     $ pimp --init @venv  # init a .pimp folder for build-up of @venv
@@ -55,6 +55,7 @@ virtual envioronment `@venv` with skeleton setup/cleanup scripts.
     │   └── setup.sh
     ├── consign
     ├── deploy
+    ├── init.sh
     └── venv
 ```
 

@@ -457,6 +457,11 @@
 		     echo '' >>$PIMPBIN/cleanup.sh
 		     echo "echo '=== cleanup virtual environment ...'" >>$PIMPBIN/cleanup.sh
 
+            # provide an init.sh skeleton script
+
+		     echo '#!/bin/bash' >$PIMP/init.sh
+         echo '# init.sh: post init of virtual environment' >>$PIMP/init.sh
+
 		        # add virtual environment name to .gitignore
 
 		     if [ -d ".git" ]; then
