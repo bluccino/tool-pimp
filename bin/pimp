@@ -9,7 +9,7 @@
 
    if [ "$*" == "-?" ] || [ "$*" == "--help" ] || [ "$*" == "--?" ]; then
       pimp ---g   "pimp virtual environment (version `pimp --version`)"
-      pimp ---y   'usage: pimp [-adimz?] [--<opt>] [<venv>] [<bin>]'
+      pimp ---y   'usage: pimp [-adimpz?] [--<opt>] [<venv>] [<bin>]'
       echo        '  . pimp                     # pimp, consign, install and activate virtual environment'
       echo        '  . pimp -a                  # locate and activate virtual environment'
       #echo       '  pimp @venv                 # pimp @venv to support setup/cleanup'
