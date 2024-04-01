@@ -461,7 +461,7 @@
 
 		     echo '#!/bin/bash' >$PIMP/init.sh
          echo '# init.sh: post init of virtual environment' >>$PIMP/init.sh
-         echo "echo 'post init of '$VENV" >>$PIMP/init.sh
+         echo "echo '  post init of '$VENV ..." >>$PIMP/init.sh
 
 		        # add virtual environment name to .gitignore
 
