@@ -11,6 +11,7 @@
       pimp ---g   "pimp virtual environment (version `pimp --version`)"
       pimp ---y   'usage: pimp [-dimz?] [--<opt>] [<venv>] [<bin>]'
       echo        '  . pimp                     # pimp, consign, install and activate virtual environment'
+      echo        '  . pimp -a                  # locate and activate virtual environment'
       #echo       '  pimp @venv                 # pimp @venv to support setup/cleanup'
       #echo       '  pimp @venv .pimp/bin       # also install binaries of .pimp/bin in @venv'
       echo        '  pimp -d                    # deploy files in .pimp/deploy into binary system folder'
@@ -52,7 +53,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0";
+      echo "1.0.0c";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -84,37 +85,41 @@
 #===============================================================================
 # . pimp --activate        # locate and activate virtual environment
 # . pimp --activate @venv  # activate given virtual environment
+# . pimp -a                # locate and activate virtual environment
+# . pimp -a @venv          # activate given virtual environment
 #===============================================================================
 
-   if [ "$1" == "--activate" ] && [ "$3" == "" ]; then
-      if [ "$_SOURCED" == 0 ]; then
-         bash pimp ---r "error: pimp $*" >&2
-         echo      "     this command line must be sourced!" >&2
-         echo      "     => enter: source pimp --activate" >&2
-         unset _SOURCED
-         return 1 2>/dev/null || exit 1  # safe return/exit
+   if [ "$1" == "--activate" ] || [ "$1" == "-a" ]; then
+      if [ "$3" == "" ]; then
+	       if [ "$_SOURCED" == 0 ]; then
+	          bash pimp ---r "error: pimp $*" >&2
+	          echo      "     this command line must be sourced!" >&2
+	          echo      "     => enter: source pimp --activate" >&2
+	          unset _SOURCED
+	          return 1 2>/dev/null || exit 1  # safe return/exit
+	       fi
+
+	       if [ "$2" == "" ]; then
+	          _VENV=`pimp --venv`
+	       else
+	          _VENV=$2
+	       fi
+
+	       if [ ! -d "$_VENV" ]; then
+	          bash pimp ---r "error: pimp $*" >&2
+	          echo      "       unable to locate virtual environment" >&2
+
+	          unset _VENV
+	          unset _SOURCED
+	          return 1 2>/dev/null || exit 1  # safe return/exit
+	       fi
+
+	       source $_VENV/bin/activate
+
+	       unset _VENV
+	       unset _SOURCED
+	       return 0 2>/dev/null || exit 0  # safe return/exit
       fi
-
-      if [ "$2" == "" ]; then
-         _VENV=`pimp --venv`
-      else
-         _VENV=$2
-      fi
-
-      if [ ! -d "$_VENV" ]; then
-         bash pimp ---r "error: pimp $*" >&2
-         echo      "       unable to locate virtual environment" >&2
-
-         unset _VENV
-         unset _SOURCED
-         return 1 2>/dev/null || exit 1  # safe return/exit
-      fi
-
-      source $_VENV/bin/activate
-
-      unset _VENV
-      unset _SOURCED
-      return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
 #===============================================================================
