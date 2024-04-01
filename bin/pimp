@@ -53,7 +53,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0c";
+      echo "1.0.0";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -94,7 +94,7 @@
 	       if [ "$_SOURCED" == 0 ]; then
 	          bash pimp ---r "error: pimp $*" >&2
 	          echo      "     this command line must be sourced!" >&2
-	          echo      "     => enter: source pimp --activate" >&2
+	          echo      "     => enter: source pimp --activate (or: . pimp -a)" >&2
 	          unset _SOURCED
 	          return 1 2>/dev/null || exit 1  # safe return/exit
 	       fi
