@@ -567,11 +567,12 @@
       pimp ---g "=== west manifest skeleton file (manifest/west.yml) created!"
 
       if [ -d $ROOT/.git ]; then
-		     read -p "shall I add deps to .gitignore [Y/n]?" ANS
+		     read -p "shall I add .west and deps to .gitignore [Y/n]?" ANS
 		     if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
- 		        echo "--- adding deps to .gitignore"
+ 		        echo "--- adding .west and deps to .gitignore"
 		        echo '' >>.gitignore
-		        echo '# dependencies folder' >>.gitignore
+		        echo '# .west and dependencies folder' >>.gitignore
+		        echo ".west" >>.gitignore
 		        echo "deps" >>.gitignore
 		     fi
       fi
