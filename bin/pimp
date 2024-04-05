@@ -28,7 +28,7 @@
         pimp ---y "more commands"
         echo      '  . pimp --activate          # locate and activate virtual environment'
         echo      '  . pimp --activate @venv    # activate given virtual environment @venv'
-        echo      '  pimp --check @venv         # check if @venv is already pimped'
+        echo      '  pimp --check               # check system requirements'
         echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
         echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
         echo      '  pimp --deploy              # deploy files in .pimp/deploy into binary system folder'
@@ -706,34 +706,166 @@ fi
    fi
 
 #===============================================================================
-# helper: pimp ---r 'text arg'   # internal helper: echo in red color
-#         pimp ---g 'text arg'   # internal helper: echo in green color
-#         pimp ---y 'text arg'   # internal helper: echo in yellow color
+# pimp --check  # check system requirements
+#===============================================================================
+
+if [ "$*" == '--check' ]; then
+    pimp ---c 'checking system requirements ...'
+    ERR=0
+    #stup '---check-vamos'  || ERR=1
+    stup '---check-git'    || ERR=1
+    stup '---check-python' || ERR=1
+    stup '---check-pip'    || ERR=1
+    stup '---check-venv'   || ERR=1
+
+    if [ "$ERR" != 0 ]; then
+        pimp ---r "error: failing system requirements"
+        #echo " => fix with '"
+        #pimp ---g "vamos --fix"
+        #echo "'"
+        exit 1
+    fi
+    exit 0
+fi
+
+#===============================================================================
+# check vamos availability
+#===============================================================================
+
+if [ "$*" == '---check-vamos' ]; then
+    ERR=0
+
+    if [ "$ERR" == 0 ]; then
+        printf '  '
+        pimp ---G 'OK'
+        echo ": playground managing tool (vamos)"
+        exit 0
+    else
+        printf '  '
+        pimp ---R 'FAIL'
+        echo ": playground managing tool (vamos) not available"
+        exit 1
+    fi
+fi
+
+#===============================================================================
+# check git availability
+#===============================================================================
+
+if [ "$*" == '---check-git' ]; then
+    ERR=0
+    git --version >/dev/null 2>/dev/null || ERR=1
+
+    if [ "$ERR" == 0 ]; then
+        printf '  '
+        pimp ---G 'OK'
+        echo ": Git version managing tool (git)"
+        exit 0
+    else
+        printf '  '
+        pimp ---R 'FAIL'
+        echo ": Git version managing tool (git) not available"
+        exit 1
+    fi
+fi
+
+#===============================================================================
+# check Python version
+#===============================================================================
+
+if [ "$*" == '---check-python' ]; then
+    PYVERS=`python3 --version`
+    OK=`echo $PYVERS | grep 'Python 3.1'`
+
+    if [ "$OK" != "" ]; then
+        printf '  '
+        pimp ---G 'OK'
+        echo ": Python version ($PYVERS)"
+        exit 0
+    else
+        printf '  '
+        pimp ---R 'FAIL'
+        echo ": Python version ($PYVERS) - must be >= Python 3.10.0"
+        exit 1
+    fi
+fi
+
+#===============================================================================
+# check pip availability
+#===============================================================================
+
+if [ "$*" == '---check-pip' ]; then
+    ERR=0
+    pip --version >/dev/null 2>/dev/null || ERR=1
+
+    if [ "$ERR" == 0 ]; then
+        printf '  '
+        pimp ---G 'OK'
+        echo ": Python package manager (pip)"
+        exit 0
+    else
+        printf '  '
+        pimp ---R 'FAIL'
+        echo ": Python package manager (pip) not available"
+        exit 1
+    fi
+fi
+
+#===============================================================================
+# check venv availability
+#===============================================================================
+
+if [ "$*" == '---check-venv' ]; then
+    ERR=0
+    python3 -m venv -h >/dev/null 2>/dev/null || ERR=1
+
+    if [ "$ERR" == 0 ]; then
+        printf '  '
+        pimp ---G 'OK'
+        echo ": virtual Python environments (venv)"
+        exit 0
+    else
+        printf '  '
+        pimp ---R 'FAIL'
+        echo ": virtual Python environments (venv) not available"
+        exit 1
+    fi
+fi
+
+#===============================================================================
+# helper: pimp ---r 'text arg'  # internal helper: echo in red color
+#         pimp ---g 'text arg'  # internal helper: echo in green color
+#         pimp ---y 'text arg'  # internal helper: echo in yellow color
+#         pimp ---R 'text arg'  # internal helper: echo in red color w/o newline
 #===============================================================================
 
    if [ "$1" == "---r" ]; then
-      printf "\x1b[31m";  shift;  echo "$*";  printf "\x1b[0m"
-      exit 0
+      printf "\x1b[31m";  shift;  echo "$*";  printf "\x1b[0m";  exit 0
    fi
 
    if [ "$1" == "---g" ]; then
-      printf "\x1b[32m";  shift;  echo "$*";  printf "\x1b[0m"
-      exit 0
+      printf "\x1b[32m";  shift;  echo "$*";  printf "\x1b[0m";  exit 0
    fi
 
    if [ "$1" == "---y" ]; then
-      printf "\x1b[33m";  shift;  echo "$*";  printf "\x1b[0m"
-      exit 0
+      printf "\x1b[33m";  shift;  echo "$*";  printf "\x1b[0m";  exit 0
    fi
 
    if [ "$1" == "---m" ]; then
-      printf "\x1b[35m";  shift;  echo "$*";  printf "\x1b[0m"
-      exit 0
+      printf "\x1b[35m";  shift;  echo "$*";  printf "\x1b[0m";  exit 0
    fi
 
    if [ "$1" == "---c" ]; then
-      printf "\x1b[36m";  shift;  echo "$*";  printf "\x1b[0m"
-      exit 0
+      printf "\x1b[36m";  shift;  echo "$*";  printf "\x1b[0m";  exit 0
+   fi
+
+
+   if [ "$1" == "---R" ]; then
+      printf "\x1b[31m";  shift;  printf "$*";  printf "\x1b[0m";  exit 0
+   fi
+
+   if [ "$1" == "---G" ]; then
+      printf "\x1b[32m";  shift;  printf "$*";  printf "\x1b[0m";  exit 0
    fi
 
 #===============================================================================
