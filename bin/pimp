@@ -43,6 +43,30 @@
         echo      '  pimp --update              # update current pimp installation to latest version'
         echo      '  pimp --venv                # echo name of virtual environment directory'
         echo      '  pimp --zephyr              # pimp virtual environment for zephyr'
+        echo      ''
+        stup ---g 'install pimped standard Python workspace:'
+        echo      '  $ mkdir /opt/zephyr/z3.6.99  # create Zephyr workspace topdir'
+        echo      '  $ cd /opt/zephyr/z3.6.99     # navigate to Zephyr workspace topdir'
+        echo      '  $ pimp -i @z3.6.99           # init pimp to create @z3.6.99'
+        echo      '  $ pimp -z                    # prepare pimping of Zephyr workspace'
+        echo      '  $ . pimp                     # run pimp process'
+        echo      '  $ pip install west           # install west in @z3.6.99'
+        echo      '  $ west init                  # init for standard Zephyr workspace'
+        echo      '  $ west update                # update Zephyr workspace'
+        echo      '  $ west zephyr-export         # export Zephyr Cmake package'
+        echo      '  $ pip install -r zephyr/scripts/requirements.txt  # install Zephyr requirements'
+        echo      ''
+        stup ---g 'install pimped specific Python workspace:'
+        echo      '  $ mkdir /opt/zephyr/z3.6.0   # create Zephyr workspace topdir'
+        echo      '  $ cd /opt/zephyr/z3.6.0      # navigate to Zephyr workspace topdir'
+        echo      '  $ pimp -i @z3.6.0            # init pimp to create @z3.6.0'
+        echo      '  $ pimp -z                    # prepare pimping of Zephyr workspace'
+        echo      '  $ . pimp                     # run pimp process'
+        echo      '  $ pip install west           # install west in @z3.6.0'
+        echo      '  $ west init -mr v3.6.0       # init Zephyr workspace revision v3.6.0'
+        echo      '  $ west update                # update Zephyr workspace'
+        echo      '  $ west zephyr-export         # export Zephyr Cmake package'
+        echo      '  $ pip install -r zephyr/scripts/requirements.txt  # install Zephyr requirements'
       fi
 
       return 0 2>/dev/null || exit 0  # safe return/exit
@@ -148,7 +172,7 @@
       chmod +x ~pimp
 
       bash ~pimp ---y "select target directory for installation of pimp:"
-      LIST=`bash ~pimp --directories`
+      LIST=`bash ~pimp ---directories`
 	    select DIR in $LIST
 	    do
          if [ "$DIR" == "" ]; then  # quit
@@ -180,7 +204,7 @@
 # pimp ---directories   # generate list of install directories
 #===============================================================================
 
-   if [ "$*" == "--directories" ]; then
+   if [ "$*" == "---directories" ]; then
       LIST=''
       for CHUNK in $(echo "$PATH" | sed 's/:/ /g')
       do
@@ -281,7 +305,7 @@
 
          if [ "$2" == "" ]; then
             bash pimp ---y "select target directory for deployment:"
-            LIST=`pimp --directories`
+            LIST=`pimp ---directories`
 	          select BIN in $LIST
 	          do
                pimp --deploy $BIN
