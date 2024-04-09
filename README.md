@@ -166,7 +166,7 @@ subfolder `bin`).
 ```
 
 
-# Tutorial
+# Tutorial 1: Create Pimped Virtual Environment
 
 In this tutorial let us consider the following tasks:
 
@@ -367,3 +367,6 @@ invoke alias `la`.
   in a virtual environment's binary folder
 * there is a simple curl-formula for downloading the `pimp` script, which can
   subsequently be copied into a binary folder of choice.
+
+
+# Tutorial 5: Selectable Zephyr Workspaces

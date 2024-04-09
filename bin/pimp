@@ -20,53 +20,82 @@
       echo        '  pimp -i @venv              # init a .pimp dir for @venv with setup/cleanup samples'
       echo        '  pimp -m                    # init a sample west manifest directory'
       echo        '  pimp -p                    # actually pimp activate script'
+      echo        '  pimp -r                    # install zephyr tree related requirements'
       echo        '  pimp -z                    # pimp virtual environment for zephyr'
       echo        '  pimp -?                    # show usage'
       echo        '  pimp --help                # comprehensive help'
       echo        '  pimp --version             # print version'
       if [ "$*" != "-?" ]; then
-        pimp ---y "more commands"
-        echo      '  . pimp --activate          # locate and activate virtual environment'
-        echo      '  . pimp --activate @venv    # activate given virtual environment @venv'
-        echo      '  pimp --check               # check system requirements'
-        echo      '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
-        echo      '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
-        echo      '  pimp --deploy              # deploy files in .pimp/deploy into binary system folder'
-        echo      '  pimp --deploy <bin>        # deploy files in .pimp/deploy into given <bin> folder'
-        echo      '  pimp --init                # init a .pimp directory'
-        echo      '  pimp --init @venv          # init a .pimp dir for @venv with setup/cleanup samples'
-        echo      '  pimp --install             # install pimp in $BIN directory'
-        echo      '  pimp --install pimp <bin>  # install pimp in <bin> directory'
-        echo      '  pimp --manifest            # init a sample west manifest directory'
-        echo      '  pimp --path <dir>          # examine path of directory in upward hierarchy'
-        echo      '  pimp --pimp                # actually pimp'
-        echo      '  pimp --update              # update current pimp installation to latest version'
-        echo      '  pimp --venv                # echo name of virtual environment directory'
-        echo      '  pimp --zephyr              # pimp virtual environment for zephyr'
-        echo      ''
-        stup ---g 'install pimped standard Python workspace:'
-        echo      '  $ mkdir /opt/zephyr/z3.6.99  # create Zephyr workspace topdir'
-        echo      '  $ cd /opt/zephyr/z3.6.99     # navigate to Zephyr workspace topdir'
-        echo      '  $ pimp -i @z3.6.99           # init pimp to create @z3.6.99'
-        echo      '  $ pimp -z                    # prepare pimping of Zephyr workspace'
-        echo      '  $ . pimp                     # run pimp process'
-        echo      '  $ pip install west           # install west in @z3.6.99'
-        echo      '  $ west init                  # init for standard Zephyr workspace'
-        echo      '  $ west update                # update Zephyr workspace'
-        echo      '  $ west zephyr-export         # export Zephyr Cmake package'
-        echo      '  $ pip install -r zephyr/scripts/requirements.txt  # install Zephyr requirements'
-        echo      ''
-        stup ---g 'install pimped specific Python workspace:'
-        echo      '  $ mkdir /opt/zephyr/z3.6.0   # create Zephyr workspace topdir'
-        echo      '  $ cd /opt/zephyr/z3.6.0      # navigate to Zephyr workspace topdir'
-        echo      '  $ pimp -i @z3.6.0            # init pimp to create @z3.6.0'
-        echo      '  $ pimp -z                    # prepare pimping of Zephyr workspace'
-        echo      '  $ . pimp                     # run pimp process'
-        echo      '  $ pip install west           # install west in @z3.6.0'
-        echo      '  $ west init -mr v3.6.0       # init Zephyr workspace revision v3.6.0'
-        echo      '  $ west update                # update Zephyr workspace'
-        echo      '  $ west zephyr-export         # export Zephyr Cmake package'
-        echo      '  $ pip install -r zephyr/scripts/requirements.txt  # install Zephyr requirements'
+         pimp ---y "more commands"
+         echo     '  . pimp --activate          # locate and activate virtual environment'
+         echo     '  . pimp --activate @venv    # activate given virtual environment @venv'
+         echo     '  pimp --check               # check system requirements'
+         echo     '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
+         echo     '  pimp --copy @venv <bin>    # set x-permissions & copy <bin> files to @venv/bin'
+         echo     '  pimp --deploy              # deploy files in .pimp/deploy into binary system folder'
+         echo     '  pimp --deploy <bin>        # deploy files in .pimp/deploy into given <bin> folder'
+         echo     '  pimp --init                # init a .pimp directory'
+         echo     '  pimp --init @venv          # init a .pimp dir for @venv with setup/cleanup samples'
+         echo     '  pimp --install             # install pimp in $BIN directory'
+         echo     '  pimp --install pimp <bin>  # install pimp in <bin> directory'
+         echo     '  pimp --manifest            # init a sample west manifest directory'
+         echo     '  pimp --path <dir>          # examine path of directory in upward hierarchy'
+         echo     '  pimp --pimp                # actually pimp'
+         echo     '  pimp --requirements        # install zephyr tree related requirements'
+         echo     '  pimp --update              # update current pimp installation to latest version'
+         echo     '  pimp --venv                # echo name of virtual environment directory'
+         echo     '  pimp --zephyr              # pimp virtual environment for zephyr'
+         echo     ''
+         stup ---g 'example: create pimped virtual environment:'
+         echo     '  $ mkdir $TMP/venv-demo         # create sample directory'
+         echo     '  $ cd $TMP/venv-demo            # navigate to sample directory'
+         echo     '  $ pimp -i @venv                # init .pimp folder for @venv creation'
+         echo     '  $ . pimp                       # run pimp process, create pimped @venv'
+         echo     ''
+         stup ---g 'example: create skeleton west workspace (without virtual environment):'
+         echo     '  $ pimp -a path-to/tools/@tools # activate @tools with west installed'
+         echo     '  $ mkdir $TMP/my-ws             # create sample workspace topdir'
+         echo     '  $ cd $TMP/my-ws                # navigate to sample workspace topdir'
+         echo     '  $ git init                     # init as a git repository'
+         echo     '  $ pimp -i                      # init .pimp folder (no venv creation)'
+         echo     '  $ pimp -m                      # provide skeleton manifest (manifest/west.yml))'
+         echo     '  $ ...                          # customize manifest/west.yml'
+         echo     '  $ west init --local manifest   # init local west manifest'
+         echo     '  $ west update                  # update west workspace'
+         echo     ''
+         stup ---g 'example: create /opt/zephyr directory:'
+         echo     '  $ sudo mkdir /opt/zephyr       # make root-owned directory'
+         echo     '  $ sudo chown $(whoami) /opt/zephyr # change ownership'
+         echo     ''
+         stup ---g 'example: install pimped standard Python workspace:'
+         echo     '  $ mkdir /opt/zephyr/z3.6.99    # create Zephyr workspace topdir'
+         echo     '  $ cd /opt/zephyr/z3.6.99       # navigate to Zephyr workspace topdir'
+         echo     '  $ pimp -i @z3.6.99             # init pimp to create @z3.6.99'
+         echo     '  $ pimp -z                      # prepare pimping of Zephyr workspace'
+         echo     '  $ . pimp                       # run pimp process'
+         echo     '  $ pip install west             # install west in @z3.6.99'
+         echo     '  $ west init                    # init for standard Zephyr workspace'
+         echo     '  $ west update                  # update Zephyr workspace'
+         echo     '  $ pimp -r                      # install Zephyr tree related requirements'
+         echo     ''
+         stup ---g 'example: install pimped specific Python workspace:'
+         echo     '  $ mkdir /opt/zephyr/z3.6.0     # create Zephyr workspace topdir'
+         echo     '  $ cd /opt/zephyr/z3.6.0        # navigate to Zephyr workspace topdir'
+         echo     '  $ pimp -i @z3.6.0              # init pimp to create @z3.6.0'
+         echo     '  $ pimp -z                      # prepare pimping of Zephyr workspace'
+         echo     '  $ . pimp                       # run pimp process'
+         echo     '  $ pip install west             # install west in @z3.6.0'
+         echo     '  $ west init -mr v3.6.0         # init Zephyr workspace revision v3.6.0'
+         echo     '  $ west update                  # update Zephyr workspace'
+         echo     '  $ pimp -r                      # install Zephyr tree related requirements'
+         echo     ''
+         stup ---g 'example: run freestanding zephyr sample under @z3.6.99:'
+         echo     '  $ . pimp -a /opt/zephyr/z3.6.99/@z3.6.99  # activate Zephyr workspace'
+         echo     '  $ cp -r /opt/zephyr/z3.6.99/zephyr/samples/hello_world $TMP/sample'
+         echo     '  $ cd $TMP/sample               # navigate to freestanding Zephyr sample'
+         echo     '  $ rm -rf build                 # cleanup sample'
+         echo     '  $ export BOARD=qemu_cortex_m3  # setup BOARD identifier for QEMU'
+         echo     '  $ west build -t run            # build & run freestanding Zephyr sample'
       fi
 
       return 0 2>/dev/null || exit 0  # safe return/exit
@@ -926,6 +955,24 @@ fi
       pimp ---g "pimp update complete (version `pimp --version`)"
 	    exit 0
 	 fi
+
+
+
+#===============================================================================
+# pimp --requirements (pimp -r)  # install zephyr tree related requirements
+#===============================================================================
+
+	 if [ "$*" == "--requirements" ] || [ "$*" == "-r" ]; then
+      pimp ---g "=== install zephyr tree related requirements"
+
+      pimp ---y "west zephyr-export"
+      west zephyr-export || exit 1
+
+      pimp ---y "pip install -r zephyr/scripts/requirements.txt"
+      pip install -r zephyr/scripts/requirements.txt || exit 1
+
+      exit 0
+   fi
 
 #===============================================================================
 # pimp ---all   # pimp, consign and install files in virtual environment
