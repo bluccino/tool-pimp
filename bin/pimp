@@ -517,14 +517,14 @@
 		     echo '#!/bin/bash' >$PIMPBIN/setup.sh
 		     echo '# setup (setup script for virtual environment)' >>$PIMPBIN/setup.sh
 		     echo '' >>$PIMPBIN/setup.sh
-		     echo "echo '=== setup virtual environment ...'" >>$PIMPBIN/setup.sh
+		     echo "echo '=== setup virtual environment '$VENV' ...'" >>$PIMPBIN/setup.sh
 
 		        # provide a cleanup sample
 
 		     echo '#!/bin/bash' >$PIMPBIN/cleanup.sh
 		     echo '# cleanup (cleanup script for virtual environment)' >>$PIMPBIN/cleanup.sh
 		     echo '' >>$PIMPBIN/cleanup.sh
-		     echo "echo '=== cleanup virtual environment ...'" >>$PIMPBIN/cleanup.sh
+		     echo "echo '=== cleanup virtual environment '$VENV' ...'" >>$PIMPBIN/cleanup.sh
 
             # provide an init.sh skeleton script
 
