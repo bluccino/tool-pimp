@@ -16,6 +16,7 @@
       #echo       '  pimp @venv .pimp/bin       # also install binaries of .pimp/bin in @venv'
       echo        '  pimp -d                    # deploy files in .pimp/deploy into binary system folder'
       echo        '  pimp -d <bin>              # deploy files in .pimp/deploy into given <bin> folder'
+      echo        '  pimp -D                    # deploy files in .pimp/deploy into $BIN folder'
       echo        '  pimp -i                    # init a .pimp directory'
       echo        '  pimp -i @venv              # init a .pimp dir for @venv with setup/cleanup samples'
       echo        '  pimp -m                    # init a sample west manifest directory'
@@ -306,12 +307,24 @@
 #===============================================================================
 # pimp --deploy       # deploy files into .pimp/deploy to binary system folder'
 # pimp --deploy <bin> # deploy files into given <bin> folder'
+# pimp -d             # deploy files into .pimp/deploy to binary system folder'
+# pimp -d <bin>       # deploy files into given <bin> folder'
+# pimp -D             # deploy files into $BIN folder'
 #===============================================================================
 
-   if [ "$1" == "--deploy" ] || [ "$1" == "-d" ]; then
+   if [ "$1" == "--deploy" ] || [ "$1" == "-d" ] || [ "$*" == "-D" ]; then
       if [ "$3" == "" ]; then
          PIMP=`pimp --path .pimp`
          ROOT=$(dirname $PIMP)
+
+            # command line 'pimp -D' is just syntactic sugar ...
+
+         if [ "$*" == "-D" ]; then
+            pimp --deploy $BIN || exit 1
+            exit 0
+         fi
+
+            # otherwise investigate deploy list
 
          if [ "$PIMP" == "" ]; then
             bash pimp ---r "error: pimp $*" >&2
