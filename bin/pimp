@@ -976,11 +976,11 @@ fi
 #===============================================================================
 
 	 if [ "$*" == "--requirements" ] || [ "$*" == "-r" ]; then
-      pimp ---g "=== install zephyr tree related requirements"
-
+      pimp ---g "=== export a Zephyr CMake package"
       pimp ---y "west zephyr-export"
       west zephyr-export || exit 1
 
+      pimp ---g "=== install zephyr tree related requirements"
       pimp ---y "pip install -r zephyr/scripts/requirements.txt"
       pip install -r zephyr/scripts/requirements.txt || exit 1
 
