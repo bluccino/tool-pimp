@@ -11,6 +11,7 @@
       pimp ---g   "pimp virtual environment (version `pimp --version`)"
       pimp ---y   'usage: pimp [-adimpz?] [--<opt>] [<venv>] [<bin>]'
       echo        '  . pimp                     # pimp, consign, install and activate virtual environment'
+      echo        '  . pimp -y                  # pimp, consign, install and activate venv, confirm yes'
       echo        '  . pimp -a                  # locate and activate virtual environment'
       echo        '  . pimp -a ws               # activate virtual environment of workspace folder ws'
       #echo       '  pimp @venv                 # pimp @venv to support setup/cleanup'
@@ -109,7 +110,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0a";
+      echo "1.0.0b";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -121,13 +122,19 @@
    (return 0 2>/dev/null) && _SOURCED=1 || _SOURCED=0  # determine _SOURCED
 
 #===============================================================================
-# pimp --path <dir>   # examine path of directory in upward hierarchy
+# . pimp     # run pimp process
+# . pimp -y  # run pimp process, confirm with y
 #===============================================================================
 
-   if [ "$*" == "" ]; then
+   if [ "$*" == "" ] || [ "$*" == "-y" ]; then
       if [ "$_SOURCED" != 0 ]; then
-         bash pimp ---all  # pimp (create/consign/install) virtual environment
-         source pimp --activate # activate virtual environment
+         if [ "$*" == "-y" ]; then
+            bash pimp ---all-y       # pimp (create/consign/install) virtual env
+            source pimp --activate-s # activate virtual environment (silent)
+         else
+            bash pimp ---all         # pimp (create/consign/install) virtual env
+            source pimp --activate   # activate virtual environment
+         fi
 
          unset _SOURCED
          return 0 2>/dev/null || exit 0  # safe return/exit
@@ -140,12 +147,13 @@
 
 #===============================================================================
 # . pimp --activate        # locate and activate virtual environment
+# . pimp --activate-s      # locate and activate virtual environment, silent
 # . pimp --activate @venv  # activate given virtual environment
 # . pimp -a                # locate and activate virtual environment
 # . pimp -a @venv          # activate given virtual environment
 #===============================================================================
 
-   if [ "$1" == "--activate" ] || [ "$1" == "-a" ]; then
+   if [ "$1" == "--activate" ] || [ "$1" == "--activate-s" ] || [ "$1" == "-a" ]; then
       if [ "$3" == "" ]; then
 	       if [ "$_SOURCED" == 0 ]; then
 	          bash pimp ---r "error: pimp $*" >&2
@@ -184,7 +192,11 @@
 	          return 1 2>/dev/null || exit 1  # safe return/exit
 	       fi
 
-	       source $_VENV/bin/activate
+         if [ "$1" == "--activate-s" ]; then
+	         source $_VENV/bin/activate >/dev/null
+         else
+	         source $_VENV/bin/activate
+         fi
 
 	       unset _VENV
 	       unset _SOURCED
@@ -285,7 +297,7 @@
 # pimp --consign   # consign binaries and set x-permissions to .pimp/bin
 #===============================================================================
 
-   if [ "$*" == "--consign" ]; then
+   if [ "$*" == "--consign" ] || [ "$*" == "--consign-s" ]; then
       PIMP=`pimp --path .pimp` || exit 1
 
       if [ ! -f "$PIMP/consign" ]; then
@@ -300,7 +312,9 @@
 
          # consign files listed in consignment file
 
-      pimp ---g "=== consigning files (=> $PIMP/bin)"
+      if [ "$*" != "--consign-s" ]; then
+         pimp ---g "=== consigning files (=> $PIMP/bin)"
+      fi
 
       ROOT=${PIMP%"/.pimp"}
       FILES=`cat $PIMP/consign`
@@ -670,7 +684,7 @@
 # pimp -p       # actually pimp virtual environment
 #===============================================================================
 
-   if [ "$*" == "--pimp" ] || [ "$*" == "-p" ]; then
+   if [ "$*" == "--pimp" ] || [ "$*" == "--pimp-s" ] || [ "$*" == "-p" ]; then
       ACTIVATE=`pimp --venv`/bin/activate
 
       if [ ! -f "$ACTIVATE" ]; then
@@ -682,10 +696,14 @@
       FOUND="1"
       cat $ACTIVATE | grep /bin/setup.sh >/dev/null || FOUND="0"
       if [ $FOUND == "1" ]; then
-         pimp ---y "no action: $ACTIVATE is already pimped"
+         if [ "$*" != "--pimp-s" ]; then
+            pimp ---y "no action: $ACTIVATE is already pimped"
+         fi
          exit 0
       else
-         pimp ---g "=== pimping $ACTIVATE"
+         if [ "$*" != "--pimp-s" ]; then
+            pimp ---g "=== pimping $ACTIVATE"
+         fi
          pimp ---pimp-setup $ACTIVATE
          pimp ---pimp-cleanup $ACTIVATE
       fi
@@ -1004,10 +1022,11 @@ fi
    fi
 
 #===============================================================================
-# pimp ---all   # pimp, consign and install files in virtual environment
+# pimp ---all    # pimp, consign and install files in virtual environment
+# pimp ---all-y  # pimp, consign and install files in venv, confirm YES
 #===============================================================================
 
-   if [ "$*" == "---all" ]; then
+   if [ "$*" == "---all" ] || [ "$*" == "---all-y" ]; then
       PIMP=.pimp
       ROOT=`pwd`
       VENV=`pimp --venv`
@@ -1017,20 +1036,24 @@ fi
       if [ "$VENV" == "" ]; then
          if [ -f $PIMP/venv ]; then
             VENV=`cat $PIMP/venv`
-            pimp ---c "virtual environment not existing!"
+            if [ "$*" != "---all-y" ]; then
+               pimp ---c "virtual environment not existing!"
 
-            read -p "shall I create virtual environment $VENV [Y/n]?" ANS
-				    if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
-				       exit 0
-				    fi
+               read -p "shall I create virtual environment $VENV [Y/n]?" ANS
+				       if [ "$ANS" != "Y" ] && [ "$ANS" != "y" ] && [ "$ANS" != "" ]; then
+				          exit 0
+				       fi
+            fi
 
             if [ "`which python3`" == "" ]; then
-               pimp ---r "python3 is not installed"
-               echo      '=> please install python3 (versin >= 3.11)'
+               pimp ---r "python3 is not installed" >&2
+               echo      '=> please install python3 (versin >= 3.11)' >&2
                exit 1
             fi
 
-            pimp ---g "=== creating virtual environment $VENV ..."
+            if [ "$*" != "---all-y" ]; then
+               pimp ---g "=== creating virtual environment $VENV ..."
+            fi
             python3 -m venv $VENV || exit 1
 
          else
@@ -1042,7 +1065,11 @@ fi
 
          # next we pimp the virtual environment
 
-      pimp --pimp
+      if [ "$*" != "---all-y" ]; then
+         pimp --pimp
+      else
+         pimp --pimp-s
+      fi
 
          # optional operations regarding west
 
@@ -1054,48 +1081,85 @@ fi
          PATH=$OLD
 
          if [ "$INSTALLED" == "0" ]; then
-            pimp ---c "west not installed in $VENV"
-            read -p "shall I install west in $VENV [Y/n]?" ANS
+            if [ "$*" != "---all-y" ]; then
+               pimp ---c "west not installed in $VENV"
+               read -p "shall I install west in $VENV [Y/n]?" ANS
+            else
+               ANS="Y"
+            fi
+
 				    if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
-               pimp ---g "=== installing west"
-               pimp ---y "source $VENV/bin/activate"
-               source $VENV/bin/activate
-               pimp ---y "pip install west"
-               pip install west
+               if [ "$*" != "---all-y" ]; then
+	                pimp ---g "=== installing west"
+	                pimp ---y "source $VENV/bin/activate"
+	                source $VENV/bin/activate
+	                pimp ---y "pip install west"
+	                pip install west
+               else
+	                source $VENV/bin/activate >/dev/null
+	                pip install west >/dev/null
+               fi
 				    fi
          fi
       fi
 
       if [ -f $ROOT/manifest/west.yml ] && [ ! -d $ROOT/.west ]; then
-         pimp ---c "west manifest file (manifest/west.yml) detected!"
-         read -p "shall I init west workspace [Y/n]?" ANS
+         if [ "$*" != "---all-y" ]; then
+            pimp ---c "west manifest file (manifest/west.yml) detected!"
+            read -p "shall I init west workspace [Y/n]?" ANS
+         else
+            ANS="Y"
+         fi
+
 				 if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
-            pimp ---y "west init --local $ROOT/manifest"
-            west init --local $ROOT/manifest
+            if [ "$*" != "---all-y" ]; then
+               pimp ---y "west init --local $ROOT/manifest"
+               west init --local $ROOT/manifest
+            else
+               west init --local $ROOT/manifest >/dev/null
+            fi
 		     fi
 
-         pimp ---c "workspace should be updated!"
-         read -p "shall I update west workspace [Y/n]?" ANS
+         if [ "$*" != "---all-y" ]; then
+            pimp ---c "workspace should be updated!"
+            read -p "shall I update west workspace [Y/n]?" ANS
+         else
+            ANS="Y"
+         fi
+
 				 if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
-            pimp ---y "west update"
-            west update
+            if [ "$*" != "---all-y" ]; then
+               pimp ---y "west update"
+               west update
+            else
+               west update >/dev/null
+            fi
 		     fi
       fi
 
          # next we consign the binaries
 
       if [ -f $ROOT/.pimp/consign ]; then
-         pimp ---c "there is a consignment file (.pimp/consign)"
-         read -p "shall I consign binaries and install in $VENV [Y/n]?" ANS
+         if [ "$*" != "---all-y" ]; then
+            pimp ---c "there is a consignment file (.pimp/consign)"
+            read -p "shall I consign binaries and install in $VENV [Y/n]?" ANS
+         else
+            ANS="Y"
+         fi
+
  		     if [ "$ANS" == "Y" ] || [ "$ANS" == "y" ] || [ "$ANS" == "" ]; then
-            pimp ---y "pimp --consign"
-            pimp --consign || exit 1
+            if [ "$*" != "---all-y" ]; then
+               pimp ---y "pimp --consign"
+               pimp --consign || exit 1
 
-               # copy consigned binaries to virtual environment
+                  # copy consigned binaries to virtual environment
 
-            pimp ---g "=== copy consigned binaries to virtual environment"
+               pimp ---g "=== copy consigned binaries to virtual environment"
+            else
+               pimp --consign-s || exit 1
+            fi
+
             PIMP=`pimp --path .pimp`
-
             if [ "$PIMP" == "" ]; then
                pimp ---r "error: unable to locate .pimp directory" >&2
                exit 1
@@ -1104,7 +1168,9 @@ fi
             if [ -d "$PIMP/bin" ]; then
   	           for FILE in $PIMP/bin/*
 	             do
-	                echo "  $FILE -> $VENV/bin"
+                  if [ "$*" != "---all-y" ]; then
+	                   echo "  $FILE -> $VENV/bin"
+                  fi
 	                cp $FILE $VENV/bin
 	             done
             fi
@@ -1112,11 +1178,17 @@ fi
       fi
 
       if [ -f $ROOT/.pimp/init.sh ]; then
-         pimp ---g "=== post initialize virtual environment (run .pimp/init.sh)"
-         bash $ROOT/.pimp/init.sh || exit 1
+         if [ "$*" != "---all-y" ]; then
+            pimp ---g "=== post initialize virtual environment (run .pimp/init.sh)"
+            bash $ROOT/.pimp/init.sh || exit 1
+         else
+            bash $ROOT/.pimp/init.sh >/dev/null || exit 1
+         fi
       fi
 
-	    pimp ---g "=== pimping complete"
+      if [ "$*" != "---all-y" ]; then
+   	     pimp ---g "=== pimping complete"
+      fi
       exit 0
    fi
 
