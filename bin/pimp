@@ -12,6 +12,7 @@
       pimp ---y   'usage: pimp [-adimpz?] [--<opt>] [<venv>] [<bin>]'
       echo        '  . pimp                     # pimp, consign, install and activate virtual environment'
       echo        '  . pimp -a                  # locate and activate virtual environment'
+      echo        '  . pimp -a ws               # activate virtual environment of workspace folder ws'
       #echo       '  pimp @venv                 # pimp @venv to support setup/cleanup'
       #echo       '  pimp @venv .pimp/bin       # also install binaries of .pimp/bin in @venv'
       echo        '  pimp -d                    # deploy files in .pimp/deploy into binary system folder'
@@ -29,6 +30,7 @@
       if [ "$*" != "-?" ]; then
          pimp ---y "more commands"
          echo     '  . pimp --activate          # locate and activate virtual environment'
+         echo     '  . pimp --activate ws       # activate virtual environment of workspace folder ws'
          echo     '  . pimp --activate @venv    # activate given virtual environment @venv'
          echo     '  pimp --check               # check system requirements'
          echo     '  pimp --consign             # consign binaries and set x-permissions to .pimp/bin'
@@ -107,7 +109,7 @@
 #===============================================================================
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.0";
+      echo "1.0.0a";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -153,10 +155,24 @@
 	          return 1 2>/dev/null || exit 1  # safe return/exit
 	       fi
 
+            # for empty arg2 we try to search virtual environment dir
+            # in current directory
+
 	       if [ "$2" == "" ]; then
-	          _VENV=`pimp --venv`
-	       else
+	          _VENV=`pimp --venv`   # search virtual environment dir
+         fi
+
+            # otherwise arg2 can be either path of virtual directory or
+            # path of workspace containing virtual directory
+
+	       if [ "$2" != "" ]; then
 	          _VENV=$2
+            if [ -d "$_VENV" ] && [ ! -f $_VENV/bin/activate ]; then
+               _VENV=$(cd $_VENV;pwd)/$(cd $_VENV;pimp --venv)
+               if [ ! -f "$_VENV/bin/activate" ]; then
+                  _VENV=""  # invalid directory
+               fi
+            fi
 	       fi
 
 	       if [ ! -d "$_VENV" ]; then
