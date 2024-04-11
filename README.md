@@ -15,6 +15,20 @@ install directories (which are extracted from your PATH).
       curl -s $HUB/tool-pimp/master/bin/pimp >~pimp; bash ~pimp -!
 ```
 
+Tool `pimp` provides a self check option.
+
+```sh
+  (@ws) tool-pimp $ pimp --check
+  checking system requirements ...
+    OK: Git version managing tool (git)
+    OK: Python version (Python 3.12.2)
+    OK: Python package manager (pip)
+    OK: virtual Python environments (venv)
+```
+
+I any of the checked items is not marked with `OK` it is strongly suggested to
+fix such issue first by consulting the appendix.
+
 
 ## Pimp Basics
 
@@ -79,25 +93,6 @@ After `.pimp` is initialized, command `. pimp` creates virtual environment
     === pimping complete
     === setup virtual environment ...
     (@venv) path-to $
-```
-
-## Pimp and West
-
-In combination with the `west` tool, `pimp` can be used to install version
-controlled tools (versions are managed by `west`) in the virtual environment's
-binary folder, thus, making them accessible as long as the virtual environment
-is activated.
-
-if a `.west` directory is found in the current environment while command
-`. pimp` is invoked, `pimp` will automatically install the `west` Python
-package in the virtual environment. The following sequence is typical for the
-creation of `west` workspaces with virtual tool support (with tools only
-available during activation of the virtual environment).
-
-```
-    $ pimp --init @my-ws   # init .pimp for my workspace (@my-ws)
-    $ mkdir .west          # want also have west installed
-    $ . pimp               # build/setup/activate @my-ws and install west
 ```
 
 
@@ -371,3 +366,249 @@ invoke alias `la`.
 
 
 # Tutorial 5: Selectable Zephyr Workspaces
+
+Before installing a *Zephyr Workspace* install the Zephyr development kit as
+described on *Getting Started* guide of the *Zephyr Project* website
+(https://docs.zephyrproject.org/latest/develop/getting_started/index.html#).
+
+We suggest to install all Zephyr distributions in a directory `/opt/zephyr` owned by the user.
+
+```sh
+  ~ $ sudo mkdir /opt/zephyr             # initially owned by root
+  ~ $ sudo chown $(whoami) /opt/zephyr   # change ownership
+```
+
+Further we suggest to name all Zephyr workspace directories beginning with letter
+`z` followed by the revision number (e.g. `z3.6.99` for latest revision and
+`z3.6.0` for a specific revision). With such convention there is no name collision
+with Nordic naming conventions, which are begining a Zephyr workspace directory
+with letter `v` followed by the revision number (e.g. `v2.5.2`, `v2.6.0`)
+
+To install a *pimped Zephyr* workspace we suggest to perform the following steps:
+
+* Creating a Zephyr workspace directory (topdir)
+* Creating and activating a pimped virtual environment (in the topdir)
+* Installing `west` in the virtual environment
+* Initializing the `west` workspace
+* Updating the `west` workspace
+* Installing requirements related to the specific Zephyr tree
+
+
+## Installing a Zephyr Project Distribution
+
+### 1) Creating a Zephyr Workspace Directory
+
+```sh
+  ~ $ mkdir /opt/zephyr/z3.6.99 && cd /opt/zephyr/z3.6.99
+  z3.6.99 $  
+```
+
+Note that the Zephyr workspace topdir `/opt/zephyr/z3.6.99` relates to directory
+`zephyrproject` in the *Getting Started* documentation of the Zephyr website.
+
+
+### 2) Creating and Activating a Pimped Virtual Environment
+
+```sh
+  z3.6.99 $ pimp -i @z3.6.99     # prepare a virtual environment @z3.6.99
+  z3.6.99 $ pimp -z              # prepare a Zephyr workspace
+  z3.6.99 $ . pimp               # run pimp process
+  ...
+  (@z3.6.99) z3.6.99 $
+```
+
+
+### 3) Installing West in the Virtual Environment
+
+```sh
+  (@z3.6.99) z3.6.99 $ pip install west
+  ...
+```
+
+
+### 4) Initializing the West Workspace
+
+To install the latest revision of the Zephyr workspace:
+
+```sh
+   (@z3.6.99) z3.6.99 $ west init
+   ...
+```
+
+To install a Zephyr workspace with a specific revision (e.g. `v3.6.0`) a
+workspace directory with different name (`/opt/zephyr/z3.6.0`) and virtual
+environment directory `/opt/zephyr/z3.6.0/@z3.6.0` would have been created.
+The initializing command would then be:
+
+```sh
+   (@z3.6.0) z3.6.0 $ west init -mr v3.6.0
+   ...
+```
+
+### 5) Installing Requirements Related to Zephyr Tree
+
+```sh
+  (@z3.6.99) z3.6.99 $ pimp -r  # install Zephyr tree related requirements
+```
+
+To test the installation (note: Zephyr SDK needs to be installed):
+
+```sh
+  (@z3.6.99) z3.6.99 $ cd zephyr/samples/hello_world
+  (@z3.6.99) hello_world $ export BOARD=qemu_cortex_m3
+  (@z3.6.99) hello_world $ west build -t run
+  ...
+  Hello World! qemu_cortex_m3
+```
+
+
+## Final Remarks
+
+Pimping a Zephyr workspace can be done also, after the west workspace has been
+already initialized and updated. This is shown below for specific Zephyr
+revision `z3.6.0` and `west` is installed in some global virtual environment
+`@tools`.
+
+```sh
+  (@tools) z3.6.0 $ west init -mr v3.6.0
+  ...
+  (@tools) z3.6.0 $ west update
+  ...
+  (@tools) z3.6.0 $ pimp -r  # install Zephyr tree related requirements
+  ...
+```
+
+With above commands the Zephyr workspace revision `v3.6.0` is installed (but not
+pimped). The post-pimping procedure is as follows.
+
+```sh
+  (@tools) z3.6.0 $ pimp -i @z3.6.0
+  === initializing .pimp directory
+  (@tools) z3.6.0 $ pimp -z
+  === pimping .pimp for zephyr
+  (@tools) z3.6.0 $ . pimp             # run pimp process
+  ...
+  (@z3.6.0) z3.6.0 $ pip install west  # install west in @z3.6.0
+  ...
+```
+
+The last command to install west in `@z3.6.0` is necessary if `west` is not
+installed in a system Python installation. The same procedure can be applied to
+a *Nordic Zephyr Installation*, which has been installed with the
+*nRF Connect Toolchain Manager*. The procedure (applied to `v2.5.2` revision)
+looks as follows.
+
+```sh
+  ~ / cd /opt/nordic/ncs/v2.5.2        # navigate to Nordic Zephyr workspace
+  v2.5.2 $ pimp -i @v2.5.2
+  === initializing .pimp directory
+  v2.5.2 $ pimp -z
+  === pimping .pimp for zephyr
+  v2.5.2 $ . pimp             # run pimp process
+  ...
+  (@v2.5.2) v2.5.2 $ pip install west  # install west in @v2.5.2
+```
+
+
+
+
+# Appendix - Fixing Installation Issues
+
+`pimp` can check the system requirements in a limited extent.
+
+```sh
+  (@ws) tool-pimp $ pimp --check
+  checking system requirements ...
+    OK: Git version managing tool (git)
+    OK: Python version (Python 3.12.2)
+    OK: Python package manager (pip)
+    OK: virtual Python environments (venv)
+```
+
+If one of the requirements fails we recommend to consult the first two sections
+of the *Getting Started* guide of the *Zephyr Project* website
+(https://docs.zephyrproject.org/latest/develop/getting_started/index.html#).
+
+* *Select and Update OS*
+* *Install Dependencies*
+
+At the time of writing (Zephyr v3.6.99) this documentation provides the
+following guidance.
+
+
+## Select an Update OS on Ubuntu Platform
+
+Run the following commands:
+
+```sh
+  sudo apt update
+  sudo apt upgrade  
+```
+
+## Install Dependencies on Ubuntu Platform
+
+If using an Ubuntu version older than 22.04, it is necessary to add extra
+repositories to meet the minimum required versions for the main dependencies
+listed above. In that case, download, inspect and execute the Kitware archive
+script to add the Kitware APT repository to your sources list. A detailed
+explanation of kitware-archive.sh can be found here kitware third-party apt
+repository:
+
+```sh
+  wget https://apt.kitware.com/kitware-archive.sh
+  sudo bash kitware-archive.sh
+```
+
+Use apt to install the required dependencies:
+
+```sh
+  sudo apt install --no-install-recommends git wget
+  sudo apt install --no-install-recommends python3-dev python3-pip python3-setuptools
+  sudo apt install --no-install-recommends python3-tk python3-wheel
+```
+
+
+## Select an Update OS on MacOS Platform
+
+On macOS Mojave or later, select System Preferences > Software Update.
+Click Update Now if necessary.
+
+
+## Install Dependencies on MacOS Platform
+
+Install Homebrew:
+
+```sh
+  HUB=https://raw.githubusercontent.com/Homebrew; \
+      /bin/bash -c "$(curl -fsSL $HUB/install/HEAD/install.sh)"
+```
+
+After the Homebrew installation script completes, follow the on-screen instructions to add the Homebrew installation to the path.
+
+* On macOS running on Apple Silicon, this is achieved with:
+
+```sh
+     (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.bash_profile
+     source ~/.bash_profile
+```
+
+* On macOS running on Intel, use the this command:
+
+```sh
+     (echo; echo 'eval "$(/usr/local/bin/brew shellenv)"') >> ~/.bash_profile
+     source ~/.bash_profile
+```
+
+Use brew to install the required dependencies:
+
+```sh
+  brew install cmake ninja gperf python3 ccache qemu dtc libmagic wget openocd
+```
+
+Add the Homebrew Python folder to the path, in order to be able to execute python and pip as well python3 and pip3.
+
+```sh
+  (echo; echo 'export PATH="'$(brew --prefix)'/opt/python/libexec/bin:$PATH"') \
+    >> ~/.bash_profile
+  source ~/.bash_profile
+```
