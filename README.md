@@ -388,7 +388,6 @@ To install a *pimped Zephyr* workspace we suggest to perform the following steps
 
 * Creating a Zephyr workspace directory (topdir)
 * Creating and activating a pimped virtual environment (in the topdir)
-* Installing `west` in the virtual environment
 * Initializing the `west` workspace
 * Updating the `west` workspace
 * Installing requirements related to the specific Zephyr tree
@@ -417,16 +416,10 @@ Note that the Zephyr workspace topdir `/opt/zephyr/z3.6.99` relates to directory
   (@z3.6.99) z3.6.99 $
 ```
 
-
-### 3) Installing West in the Virtual Environment
-
-```sh
-  (@z3.6.99) z3.6.99 $ pip install west
-  ...
-```
+The `. pimp` process automatically installs `west` (to be confirmed). 
 
 
-### 4) Initializing the West Workspace
+### 3) Initializing the West Workspace
 
 To install the latest revision of the Zephyr workspace:
 
@@ -443,6 +436,13 @@ The initializing command would then be:
 ```sh
    (@z3.6.0) z3.6.0 $ west init -mr v3.6.0
    ...
+```
+
+### 4) Updating the Zephyr Workspace
+
+```sh
+  (@z3.6.0) z3.6.0 $ west update
+  ...
 ```
 
 ### 5) Installing Requirements Related to Zephyr Tree
@@ -488,8 +488,6 @@ pimped). The post-pimping procedure is as follows.
   === pimping .pimp for zephyr
   (@tools) z3.6.0 $ . pimp             # run pimp process
   ...
-  (@z3.6.0) z3.6.0 $ pip install west  # install west in @z3.6.0
-  ...
 ```
 
 The last command to install west in `@z3.6.0` is necessary if `west` is not
@@ -505,8 +503,6 @@ looks as follows.
   v2.5.2 $ pimp -z
   === pimping .pimp for zephyr
   v2.5.2 $ . pimp             # run pimp process
-  ...
-  (@v2.5.2) v2.5.2 $ pip install west  # install west in @v2.5.2
 ```
 
 
