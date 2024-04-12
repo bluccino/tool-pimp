@@ -492,13 +492,13 @@
             TOOLS="$TOOLS $TOOL"
          fi
 
-         TOOLSTR=$TOOL':                                   '
+         TOOLSTR=$TOOL':                                             '
 
          AVAIL="$VSRC"',                                  '
          if [ "$VSRC" != "$VDST" ]; then
-            pimp ---c "    ${TOOLSTR:0:20} available: ${AVAIL:0:20} current: $VDST" 1>&2
+            pimp ---c "    ${TOOLSTR:0:30} available: ${AVAIL:0:12} current: $VDST" 1>&2
          else
-            echo "    ${TOOLSTR:0:20} available: ${AVAIL:0:20} current: $VDST" 1>&2
+            echo "    ${TOOLSTR:0:30} available: ${AVAIL:0:12} current: $VDST" 1>&2
          fi
       done
 
