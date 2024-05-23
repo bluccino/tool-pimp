@@ -18,7 +18,7 @@ install directories (which are extracted from your PATH).
 Tool `pimp` provides a self check option.
 
 ```sh
-  (@ws) tool-pimp $ pimp --check
+  $ pimp --check
   checking system requirements ...
     OK: Git version managing tool (git)
     OK: Python version (Python 3.12.2)
