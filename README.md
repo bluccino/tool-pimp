@@ -84,7 +84,7 @@ After `.pimp` is initialized, command `. pimp` creates virtual environment
 ```sh
     path-to $ . pimp
     virtual environment not existing!
-    shall I create virtual environment @venv [Y/n]?
+    shall I create virtual environment @venv [Y/n]? Y
     === creating virtual environment @venv ...
     === pimping @venv/bin/activate
     === consigning files (=> /Users/hux/Bluenetics/Git/Tmp/.pimp/bin)
