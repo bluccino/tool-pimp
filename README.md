@@ -15,6 +15,30 @@ install directories (which are extracted from your PATH).
       curl -s $HUB/tool-pimp/master/bin/pimp >~pimp; bash ~pimp -!
 ```
 
+## Pre-Requisites
+
+Pre-requisites for `pimp` is a `bash` environment (as supported by Linux,
+Mac-OS and Windows/WSL) with `python` and `pip` running. At the time of writing
+`pimp` was tested on a Mac computer with the following installation:
+
+```sh
+    $ python --version
+    Python 3.11.7
+    $ pip --version
+    pip 24.0 from ...
+```
+
+Availability of `tree` is helpful for following the tutorial but not
+absolutely necessary. With `curl` installed the next section shows an easy way
+to download and install `pimp`. On the other hand, cloning the `pimp` repository
+from github and manual copy of `pimp` to a binary directory listed in `$PATH`
+will also do the job (`pimp` is located in the repository's
+subfolder `bin`).
+
+```sh
+    $ git clone https://github.com/bluccino/tools-pimp  # see tools-pimp/bin/pimp
+```
+
 Tool `pimp` provides a self check option.
 
 ```sh
@@ -170,31 +194,6 @@ showcasing installation of Zephyr version 3.5.0
 ```sh
     (@z3.5.0) z3.5.0 $ west update            # update zephyr installation
     ...
-```
-
-
-
-## Pre-Requisites
-
-Pre-requisites for `pimp` is a `bash` environment (as supported by Linux,
-Mac-OS and Windows/WSL) with `python` and `pip` running. At the time of writing
-`pimp` was tested on a Mac computer with the following installation:
-
-```sh
-    $ python --version
-    Python 3.11.7
-    $ pip --version
-    pip 24.0 from ...
-```
-
-Availability of `tree` is helpful for following the tutorial but not
-absolutely necessary. With `curl` installed the next section shows an easy way
-to download and install `pimp`. On the other hand cloning the `pimp` repository
-from github will also do the job (`pimp` is located in the repository's
-subfolder `bin`).
-
-```sh
-    $ git clone https://github.com/bluccino/tools-pimp  # see tools-pimp/bin/pimp
 ```
 
 
