@@ -75,8 +75,8 @@ virtual envioronment `@venv` with skeleton `setup.sh`/`cleanup.sh` scripts.
 ```
 
 After `.pimp` is initialized, command `. pimp` creates virtual environment
-`@venv`, pimps the `@venv/bin/activate` script, installs scripts `setup` and
-`cleanup` and activates the virtual environment.
+`@venv`, pimps the `@venv/bin/activate` script, installs scripts `setup.sh` and
+`cleanup.sh` and activates the virtual environment.
 
 ```
     path-to $ . pimp
