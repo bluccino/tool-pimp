@@ -197,7 +197,7 @@ showcasing installation of Zephyr version 3.5.0
 ```
 
 
-# Tutorial 1: Create Pimped Virtual Environment
+# Tutorial 1: Create a Pimped Virtual Environment
 
 In this tutorial let us consider the following tasks:
 
