@@ -270,6 +270,8 @@ to source.
     my-ws $ cat .pimp/bin/setup.sh    # let's see the content of script setup.sh
     echo 'hello, @my-ws'
     alias la='ls -a'
+```
+```sh
     my-ws $ source .pimp/bin/setup.sh  # test script setup (we need to source)
     hello, @my-ws
     my-ws $ la  # test alias
@@ -291,6 +293,9 @@ since the alias should be removed.
     my-ws $ cat .pimp/bin/cleanup.sh    # let's see the content of cleanup
     echo 'good bye, @my-ws'
     unalias la
+```
+```sh
+
     my-ws $ source .pimp/bin/cleanup.sh  # test script cleanup (we need to source)
     good bye, @my-ws
     my-ws $ la  # test alias
