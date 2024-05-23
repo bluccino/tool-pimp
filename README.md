@@ -10,7 +10,7 @@ In a `bash` shell with installed `curl` execute the following one-line command
 to download and install `pimp`. Select a number from the list of potential
 install directories (which are extracted from your PATH).
 
-```
+```sh
   HUB=https://raw.githubusercontent.com/bluccino; \
       curl -s $HUB/tool-pimp/master/bin/pimp >~pimp; bash ~pimp -!
 ```
@@ -60,7 +60,7 @@ files located in a hidden `.pimp` directory. The command line below
 demonstrates a sample initialization of `.pimp` directory for building a
 virtual envioronment `@venv` with skeleton `setup.sh`/`cleanup.sh` scripts.
 
-```
+```sh
     $ pimp --init @venv  # init a .pimp folder for build-up of @venv
     === initializing .pimp directory ...
     $ tree .pimp
@@ -78,7 +78,7 @@ After `.pimp` is initialized, command `. pimp` creates virtual environment
 `@venv`, pimps the `@venv/bin/activate` script, installs scripts `setup.sh` and
 `cleanup.sh` and activates the virtual environment.
 
-```
+```sh
     path-to $ . pimp
     virtual environment not existing!
     shall I create virtual environment @venv [Y/n]?
@@ -106,7 +106,7 @@ virtual environment is activated, and to unset in the deactivation case
 (setting ZEPHYR_BASE is vital for bilding freestanding applications). In such
 use case the pimp can automatically prepare proper `setup`/`cleanup` scripts.
 
-```
+```sh
     #!/bin/bash
     # setup (setup script for virtual environment)
 
@@ -114,7 +114,7 @@ use case the pimp can automatically prepare proper `setup`/`cleanup` scripts.
     export ZEPHYR_BASE=/path-to/zephyr
 ```
 
-```
+```sh
 		#!/bin/bash
 		# cleanup (cleanup script for virtual environment)
 
@@ -124,16 +124,16 @@ use case the pimp can automatically prepare proper `setup`/`cleanup` scripts.
 
 Pimp has a special feature (option `--zephyr`) to pimp a virtual environment
 of a west/zephyr workspace which is demonstrated in the following example,
-showcasing installation of Zephyr version 3.6.0
+showcasing installation of Zephyr version 3.5.0
 
-```
+```sh
     ... $ mkdir z3.5.0; cd z3.5.0
     z3.5.0 $ pimp --init @z3.5.0              # init .pimp with setup/cleanup scripts
     z3.5.0 $ pimp --zephyr                    # extend setup/cleanup for zephyr
     z3.5.0 $ . pimp                           # create/pimp/activate virtual environment
     (@z3.5.0) z3.5.0 $ pip install west       # install west (Python) package in @z3.5.0
     (@z3.5.0) z3.5.0 $ west init -mr v3.5.0   # init for specific version
-    (@z3.6.0) z3.6.0 $ west update            # update zephyr installation
+    (@z3.5.0) z3.5.0 $ west update            # update zephyr installation
 ```
 
 
@@ -144,7 +144,7 @@ Pre-requisites for `pimp` is a `bash` environment (as supported by Linux,
 Mac-OS and Windows/WSL) with `python` and `pip` running. At the time of writing
 `pimp` was tested on a Mac computer with the following installation:
 
-```
+```sh
     $ python --version
     Python 3.11.7
     $ pip --version
@@ -157,7 +157,7 @@ to download and install `pimp`. On the other hand cloning the `pimp` repository
 from github will also do the job (`pimp` is located in the repository's
 subfolder `bin`).
 
-```
+```sh
     $ git clone https://github.com/bluccino/tools-pimp  # see tools-pimp/bin/pimp
 ```
 
@@ -179,7 +179,7 @@ To avoid confusion we distinguish the name of the virtual environment folder
 (`@my-ws`) from the workspace root folder (`my-ws`) by a leading `@` character.
 In this sense the following command sequence will perform the first task.
 
-```
+```sh
     ... $ mkdir path-to/my-ws    # create folder
     ... $ cd path-to/my-ws       # change directory to my-ws
     my-ws $ python3 -m venv @my-ws
@@ -188,7 +188,7 @@ In this sense the following command sequence will perform the first task.
 Note that the virtual environment at this time is not activated. So far we got
 the following file tree:
 
-```
+```sh
     tree --dirsfirst -a -L 2
     .
     └── @my-ws
@@ -204,7 +204,7 @@ current `bash` environment. A short activation/deactivation test proofs that
 everything works well. Note that after activation a `(@my-ws)` string is shown
 at the beginning of the prompt, which disappears upon deactivation.
 
-```
+```sh
     my-ws $ source @my-ws/bin/activate  # script must be sourced for activation
     (@my-ws) my-ws $ deactivate         # undo environment modifications
     my-ws $
@@ -216,14 +216,14 @@ In a first step we will create a hidden `.pimp` folder where all stuff that
 `pimp` needs will be located. Next we create a `.pimp/bin` folder to contain all
 scripts which `pimp` should install into `@my-ws/bin`.
 
-```
+```sh
     mkdir .pimp       # a hidden folder with all stuff that pimp needs
     mkdir .pimp/bin   # for binaries which should be installed in @my-ws/bin
 ```
 
 The `setup` script echos the message 'hello, @my-ws' and defines alias `al`.
 
-```
+```sh
     my-ws $ echo "echo 'hello, @my-ws'" >.pimp/bin/setup
     my-ws $ echo "alias la='ls -a'" >>.pimp/bin/setup  # append
 ```
@@ -231,7 +231,7 @@ The `setup` script echos the message 'hello, @my-ws' and defines alias `al`.
 The plan is to source `setup` during activation, thus, for testing we also need
 to source.
 
-```
+```sh
     my-ws $ cat .pimp/bin/setup    # let's see the content of script setup
     echo 'hello, @my-ws'
     alias la='ls -a'
@@ -243,7 +243,7 @@ to source.
 
 That works well! Let's create script `cleanup`.
 
-```
+```sh
     my-ws $ echo "echo 'good bye, @my-ws'" >.pimp/bin/cleanup
     my-ws $ echo "unalias la" >>.pimp/bin/cleanup  # append
 ```
@@ -252,7 +252,7 @@ For similar reasons we need to source `cleanup` for testing. When we invoke
 alias `la` after sourcing `cleanup` we expect that `bash` reports an error,
 since the alias should be removed.
 
-```
+```sh
     my-ws $ cat .pimp/bin/cleanup    # let's see the content of cleanup
     echo 'good bye, @my-ws'
     unalias la
@@ -283,7 +283,7 @@ also OK and no error is reported.
 The first action (pimping the `activate` script) is achieved by the following
 command line:
 
-```
+```sh
     my-ws $ pimp @my-ws   # pimp @my-ws/bin/activate script
 ```
 
@@ -299,7 +299,7 @@ the second action.
 
 This is done by
 
-```
+```sh
     my-ws $ pimp @my-ws .pimp/bin   # copy all files in .pimp/bin to @my-ws
 ```
 
@@ -320,7 +320,7 @@ the virtual environment is activated.
 As a pre-check we list the virtual environment's binary directory and verify
 the copies of `setup` and `cleanup`.
 
-```
+```sh
     my-ws $  tv \@my-ws/bin
     @my-ws/bin
     ├── activate
@@ -334,7 +334,7 @@ the copies of `setup` and `cleanup`.
 Then we activate the virtual environment, cross check the 'hello message' and
 verify that alias `la` is working.
 
-```
+```sh
     my-ws $ source @my-ws/bin/activate
     hello, @my-ws
     (@my-ws) my-ws $ la   # test alias
@@ -344,7 +344,7 @@ verify that alias `la` is working.
 Finally we test deactivation and expect `bash` to issue an error message when we
 invoke alias `la`.
 
-```
+```sh
     (@my-ws) my-ws $ deactivate
     good bye, @my-ws
     my-ws $ la   # test alias
