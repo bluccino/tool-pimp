@@ -210,7 +210,7 @@ at the beginning of the prompt, which disappears upon deactivation.
     my-ws $
 ```
 
-## Creation of Scripts `setup` and `cleanup`
+## Creation of Scripts `setup.sh` and `cleanup.sh`
 
 In a first step we will create a hidden `.pimp` folder where all stuff that
 `pimp` needs will be located. Next we create a `.pimp/bin` folder to contain all
@@ -221,42 +221,42 @@ scripts which `pimp` should install into `@my-ws/bin`.
     mkdir .pimp/bin   # for binaries which should be installed in @my-ws/bin
 ```
 
-The `setup` script echos the message 'hello, @my-ws' and defines alias `al`.
+The `setup.sh` script echos the message 'hello, @my-ws' and defines alias `al`.
 
 ```sh
-    my-ws $ echo "echo 'hello, @my-ws'" >.pimp/bin/setup
-    my-ws $ echo "alias la='ls -a'" >>.pimp/bin/setup  # append
+    my-ws $ echo "echo 'hello, @my-ws'" >.pimp/bin/setup.sh
+    my-ws $ echo "alias la='ls -a'" >>.pimp/bin/setup.sh  # append
 ```
 
-The plan is to source `setup` during activation, thus, for testing we also need
+The plan is to source `setup.sh` during activation, thus, for testing we also need
 to source.
 
 ```sh
-    my-ws $ cat .pimp/bin/setup    # let's see the content of script setup
+    my-ws $ cat .pimp/bin/setup.sh    # let's see the content of script setup.sh
     echo 'hello, @my-ws'
     alias la='ls -a'
-    my-ws $ source .pimp/bin/setup  # test script setup (we need to source)
+    my-ws $ source .pimp/bin/setup.sh  # test script setup (we need to source)
     hello, @my-ws
     my-ws $ la  # test alias
     .	..	.pimp	@my-ws
 ```
 
-That works well! Let's create script `cleanup`.
+That works well! Let's create script `cleanup.sh`.
 
 ```sh
-    my-ws $ echo "echo 'good bye, @my-ws'" >.pimp/bin/cleanup
-    my-ws $ echo "unalias la" >>.pimp/bin/cleanup  # append
+    my-ws $ echo "echo 'good bye, @my-ws'" >.pimp/bin/cleanup.sh
+    my-ws $ echo "unalias la" >>.pimp/bin/cleanup.sh  # append
 ```
 
-For similar reasons we need to source `cleanup` for testing. When we invoke
-alias `la` after sourcing `cleanup` we expect that `bash` reports an error,
+For similar reasons we need to source `cleanup.sh` for testing. When we invoke
+alias `la` after sourcing `cleanup.sh` we expect that `bash` reports an error,
 since the alias should be removed.
 
 ```sh
-    my-ws $ cat .pimp/bin/cleanup    # let's see the content of cleanup
+    my-ws $ cat .pimp/bin/cleanup.sh    # let's see the content of cleanup
     echo 'good bye, @my-ws'
     unalias la
-    my-ws $ source .pimp/bin/cleanup  # test script cleanup (we need to source)
+    my-ws $ source .pimp/bin/cleanup.sh  # test script cleanup (we need to source)
     good bye, @my-ws
     my-ws $ la  # test alias
     -bash: la: command not found
@@ -272,10 +272,10 @@ When we `pimp` the virtual environment we need to do two steps:
 
 ~~~
     Step 1: We need to modify script @my-env/bin/activate, in order to implicitely
-            source setup/cleanup upon activation/deactivation of @my-ws
+            source setup.sh/cleanup.sh upon activation/deactivation of @my-ws
 ~~~
 
-How does `@my-ws/bin/activate` know where `setup` and `cleanup` are located?
+How does `@my-ws/bin/activate` know where `setup.sh` and `cleanup.sh` are located?
 In `.pimp/bin` ? The answer is no! The scripts are expected to be in the virtual
 environment's binary directory `@my-ws/bin`. If one of them is missing, it is
 also OK and no error is reported.
@@ -288,8 +288,8 @@ command line:
 ```
 
 Since `activate` defines also the `deactivate` function, this command pimps
-also `deactivate` in order to source the `@my-env/bin/cleanup` script, which is
-ignored wthout error report if missing. All in all we require pimp to do also
+also `deactivate` in order to source the `@my-env/bin/cleanup.sh` script, which is
+ignored wthout error if missing. All in all we require pimp to do also
 the second action.
 
 ~~~
@@ -318,15 +318,15 @@ the virtual environment is activated.
 ## Final Check
 
 As a pre-check we list the virtual environment's binary directory and verify
-the copies of `setup` and `cleanup`.
+the copies of `setup.sh` and `cleanup.sh`.
 
 ```sh
-    my-ws $  tv \@my-ws/bin
+    my-ws $  tree @my-ws/bin
     @my-ws/bin
     ├── activate
     :       :
-    ├── setup
-    └── cleanup
+    ├── setup.sh
+    └── cleanup.sh
 
     1 directory, 12 files
 ```
@@ -353,9 +353,9 @@ invoke alias `la`.
 
 # Conclusions
 
-* `pimp` is a `bash` based script, arranging execution of a custom `setup`
+* `pimp` is a `bash` based script, arranging execution of a custom `setup.sh`
   script at the end of the activation of a virtual environment
-* `pimp` also arranges execution of a custom `cleanup` script at the begin of
+* `pimp` also arranges execution of a custom `cleanup.sh` script at the begin of
   deactivation of a virtual environment.
 * `pimp` does this by modifying the `bin/activate` script of a virtual
   environment
