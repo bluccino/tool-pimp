@@ -406,7 +406,7 @@ invoke alias `la`.
   subsequently be copied into a binary folder of choice.
 
 
-# Tutorial 5: Selectable Zephyr Workspaces
+# Tutorial 2: Selectable Zephyr Workspaces
 
 Before installing a *Zephyr Workspace* install the Zephyr development kit as
 described on *Getting Started* guide of the *Zephyr Project* website
