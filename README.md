@@ -21,7 +21,7 @@ Tool `pimp` provides a self check option.
   $ pimp --check
   checking system requirements ...
     OK: Git version managing tool (git)
-    OK: Python version (Python 3.12.2)
+    OK: Python version (Python 3.11.7)
     OK: Python package manager (pip)
     OK: virtual Python environments (venv)
 ```
@@ -61,7 +61,7 @@ demonstrates a sample initialization of `.pimp` directory for building a
 virtual envioronment `@venv` with skeleton `setup.sh`/`cleanup.sh` scripts.
 
 ```sh
-    $ mkdir .../path-to;  cd .../path-to  # create/change to a playground directory
+    ... $ mkdir .../path-to;  cd .../path-to  # create/change to a playground directory
 ```
 ```sh
     path-to $ pimp --init @venv  # init a .pimp folder for build-up of @venv
@@ -110,7 +110,7 @@ to modify a virtual environment of a west workspace containing the zephyr tree.
 A specific task is to set the environment variable `ZEPHYR_BASE`, when the
 virtual environment is activated, and to unset in the deactivation case
 (setting ZEPHYR_BASE is vital for bilding freestanding applications). In such
-use case the pimp can automatically prepare proper `setup`/`cleanup` scripts.
+use case `pimp` can automatically prepare proper `setup.sh`/`cleanup.sh` scripts.
 
 ```sh
     #!/bin/bash
@@ -121,11 +121,11 @@ use case the pimp can automatically prepare proper `setup`/`cleanup` scripts.
 ```
 
 ```sh
-		#!/bin/bash
-		# cleanup (cleanup script for virtual environment)
+   #!/bin/bash
+   # cleanup (cleanup script for virtual environment)
 
-		echo '=== cleanup virtual environment ...'
-		unset ZEPHYR_BASE
+   echo '=== cleanup virtual environment ...'
+   unset ZEPHYR_BASE
 ```
 
 Pimp has a special feature (option `--zephyr`) to pimp a virtual environment
@@ -135,11 +135,41 @@ showcasing installation of Zephyr version 3.5.0
 ```sh
     ... $ mkdir z3.5.0; cd z3.5.0
     z3.5.0 $ pimp --init @z3.5.0              # init .pimp with setup/cleanup scripts
+    === initializing .pimp directory ...
+```
+```sh
     z3.5.0 $ pimp --zephyr                    # extend setup/cleanup for zephyr
+    === pimping .pimp for zephyr
+```
+```sh
     z3.5.0 $ . pimp                           # create/pimp/activate virtual environment
+    virtual environment not existing!
+    shall I create virtual environment @z3.5.0 [Y/n]?Y
+    === creating virtual environment @z3.5.0 ...
+    === pimping @z3.5.0/bin/activate
+    there is a consignment file (.pimp/consign)
+    shall I consign binaries and install in @z3.5.0 [Y/n]?Y
+    pimp --consign
+    === consigning files (=> /Users/hux/tmp/path-to/z3.5.0/.pimp/bin)
+    === copy consigned binaries to virtual environment
+      path-to/z3.5.0/.pimp/bin/cleanup.sh -> @z3.5.0/bin
+      path-to/z3.5.0/.pimp/bin/setup.sh -> @z3.5.0/bin
+    === post initialize virtual environment (run .pimp/init.sh)
+      post init of @z3.5.0 ...
+    === pimping complete
+    === setup virtual environment @z3.5.0 ...
+```
+```sh
     (@z3.5.0) z3.5.0 $ pip install west       # install west (Python) package in @z3.5.0
-    (@z3.5.0) z3.5.0 $ west init -mr v3.5.0   # init for specific version
+    ...
+```
+```sh
+    (@z3.5.0) z3.5.0 $ west init --mr v3.5.0  # init for specific version
+    ...
+```
+```sh
     (@z3.5.0) z3.5.0 $ west update            # update zephyr installation
+    ...
 ```
 
 
