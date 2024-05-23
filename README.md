@@ -61,9 +61,12 @@ demonstrates a sample initialization of `.pimp` directory for building a
 virtual envioronment `@venv` with skeleton `setup.sh`/`cleanup.sh` scripts.
 
 ```sh
-    $ pimp --init @venv  # init a .pimp folder for build-up of @venv
+    $ mkdir .../path-to;  cd .../path-to  # create/change to a playground directory
+```
+```sh
+    path-to $ pimp --init @venv  # init a .pimp folder for build-up of @venv
     === initializing .pimp directory ...
-    $ tree .pimp
+    path-to $ tree .pimp
     .pimp
     ├── bin
     │   ├── cleanup.sh
