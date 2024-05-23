@@ -41,8 +41,8 @@ aspects:
   a `cleanup.sh` script before the actual deactivation
 
 * optionally adding executable binary files (typically bash scripts) to the
-  virtual environment's binary folder, which are only available as long as the
-  virtual environment is activate.
+  virtual environment's binary folder, which are only "available" (executable) as long as the
+  virtual environment is activated.
 
 ~~~
     NOTE: In a typical scenario the set of binary files, which are copied to the
