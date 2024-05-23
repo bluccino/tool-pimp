@@ -274,6 +274,8 @@ to source.
 ```sh
     my-ws $ source .pimp/bin/setup.sh  # test script setup (we need to source)
     hello, @my-ws
+```
+```sh
     my-ws $ la  # test alias
     .	..	.pimp	@my-ws
 ```
@@ -295,9 +297,10 @@ since the alias should be removed.
     unalias la
 ```
 ```sh
-
     my-ws $ source .pimp/bin/cleanup.sh  # test script cleanup (we need to source)
     good bye, @my-ws
+```
+```sh
     my-ws $ la  # test alias
     -bash: la: command not found
 ```
