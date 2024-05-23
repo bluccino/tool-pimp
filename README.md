@@ -87,10 +87,13 @@ After `.pimp` is initialized, command `. pimp` creates virtual environment
     shall I create virtual environment @venv [Y/n]?Y
     === creating virtual environment @venv ...
     === pimping @venv/bin/activate
+    there is a consignment file (.pimp/consign)
+    shall I consign binaries and install in @venv [Y/n]?Y
+    pimp --consign
     === consigning files (=> /Users/hux/Bluenetics/Git/Tmp/.pimp/bin)
     === copy consigned binaries to virtual environment
-      path-to/.pimp/bin/cleanup -> @venv/bin
-      path-to/.pimp/bin/setup -> @venv/bin
+      path-to/.pimp/bin/cleanup.sh -> @venv/bin
+      path-to/.pimp/bin/setup.sh -> @venv/bin
     === post initialize virtual environment (run .pimp/init.sh)
       post init of @venv ...
     === pimping complete
