@@ -328,6 +328,7 @@ command line:
 
 ```sh
     my-ws $ pimp -p   # pimp @my-ws/bin/activate script
+    === pimping @my-ws/bin/activate
 ```
 
 Since `activate` defines also the `deactivate` function, this command pimps
@@ -343,7 +344,7 @@ the second action.
 This is done by
 
 ```sh
-    my-ws $ pimp @my-ws .pimp/bin   # copy all files in .pimp/bin to @my-ws
+    my-ws $ cp .pimp/bin/* @my-ws/bin/    # copy all files in .pimp/bin to @my-ws
 ```
 
 which copies all files located in `.pimp/bin` to the virtual environment's
@@ -352,11 +353,6 @@ additional binaries in `.pimp/bin` which would be installed by `pimp` in the
 virtual environment's binary directory, and thus, only be executable as long as
 the virtual environment is activated.
 
-~~~
-    NOTE: In fact, command `pimp <venv> <bin>` does not only install the
-    binaries in <bin> (step 2), it also performs step 1, if this has not
-    yet been done before.
-~~~  
 
 ## Final Check
 
@@ -366,10 +362,12 @@ the copies of `setup.sh` and `cleanup.sh`.
 ```sh
     my-ws $  tree @my-ws/bin
     @my-ws/bin
+    :       :
     ├── activate
     :       :
-    ├── setup.sh
-    └── cleanup.sh
+    ├── cleanup.sh
+    :       :
+    └── setup.sh
 
     1 directory, 12 files
 ```
