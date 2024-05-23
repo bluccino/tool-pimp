@@ -327,7 +327,7 @@ The first action (pimping the `activate` script) is achieved by the following
 command line:
 
 ```sh
-    my-ws $ pimp @my-ws   # pimp @my-ws/bin/activate script
+    my-ws $ pimp -p   # pimp @my-ws/bin/activate script
 ```
 
 Since `activate` defines also the `deactivate` function, this command pimps
