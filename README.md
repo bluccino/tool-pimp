@@ -50,7 +50,7 @@ Tool `pimp` provides a self check option.
     OK: virtual Python environments (venv)
 ```
 
-I any of the checked items is not marked with `OK` it is strongly suggested to
+If any of the checked items is not marked with `OK` it is strongly suggested to
 fix such issue first by consulting the appendix.
 
 
