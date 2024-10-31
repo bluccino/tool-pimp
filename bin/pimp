@@ -102,7 +102,13 @@
          echo     '  $ west update                  # update Zephyr workspace'
          echo     '  $ pimp -r                      # install Zephyr tree related requirements'
          echo     ''
-         stup ---g 'example 7: run freestanding zephyr sample under @z3.6.99:'
+         stup ---g 'example 7: pimp a nordic Zephyr installation:'
+         echo     '  $ cd /opt/nordic/ncs/v2.7.0    # navigate to the Nordic Zephyr workspace topdir'
+         echo     '  $ pimp -i @v2.7.0              # init pimp to create @v2.7.0'
+         echo     '  $ pimp -z                      # prepare pimping of Zephyr workspace'
+         echo     '  $ . pimp                       # run pimp process'
+         echo     ''
+         stup ---g 'example 8: run freestanding zephyr sample under @z3.6.99:'
          echo     '  $ . pimp -a /opt/zephyr/z3.6.99  # activate Zephyr workspace'
          echo     '  $ cp -r /opt/zephyr/z3.6.99/zephyr/samples/hello_world $TMP/sample'
          echo     '  $ cd $TMP/sample               # navigate to freestanding Zephyr sample'
@@ -119,7 +125,7 @@
 #-------------------------------------------------------------------------------
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.1";
+      echo "1.0.2";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
