@@ -732,11 +732,15 @@
 
   if [ "$1" == '---pimp-setup' ] && [ "$2" != "" ] && [ "$3" == "" ]; then
     ACTIVATE=$2
+    chmod +w $ACTIVATE
+
     echo '' >>$ACTIVATE
     echo '# custom setup' >>$ACTIVATE
     echo 'if [ -f "$VIRTUAL_ENV/bin/setup.sh" ]; then' >>$ACTIVATE
     echo '  source $VIRTUAL_ENV/bin/setup.sh' >>$ACTIVATE
     echo 'fi' >>$ACTIVATE
+
+    chmod -w $ACTIVATE
     exit 0
   fi
 
@@ -746,6 +750,8 @@
 
 if [ "$1" == '---pimp-cleanup' ] && [ "$2" != "" ] && [ "$3" == "" ]; then
   ACTIVATE=$2
+  chmod +w $ACTIVATE
+
   sed '/deactivate ()/  a\
     ' $ACTIVATE > $ACTIVATE.tmp
   sed '/deactivate ()/  a\
@@ -758,6 +764,8 @@ fi\
     if [ -f "$VIRTUAL_ENV/bin/cleanup.sh" ]; then\
     ' $ACTIVATE.tmp > $ACTIVATE
   rm $ACTIVATE.tmp
+
+  chmod -w $ACTIVATE
   exit 0
 fi
 
