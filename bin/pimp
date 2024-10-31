@@ -106,7 +106,7 @@
          echo     '  $ cd /opt/nordic/ncs/v2.7.0    # navigate to the Nordic Zephyr workspace topdir'
          echo     '  $ pimp -i @v2.7.0              # init pimp to create @v2.7.0'
          echo     '  $ pimp -z                      # prepare pimping of Zephyr workspace'
-         echo     '  $ . pimp                       # run pimp process'
+         echo     '  $ . pimp -y                    # run pimp process'
          echo     ''
          stup ---g 'example 8: run freestanding zephyr sample under @z3.6.99:'
          echo     '  $ . pimp -a /opt/zephyr/z3.6.99  # activate Zephyr workspace'
