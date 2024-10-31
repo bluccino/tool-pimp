@@ -102,7 +102,7 @@
          echo     '  $ west update                  # update Zephyr workspace'
          echo     '  $ pimp -r                      # install Zephyr tree related requirements'
          echo     ''
-         stup ---g 'example 7: pimp a nordic Zephyr installation:'
+         stup ---g 'example 7: pimp a Nordic Zephyr installation:'
          echo     '  $ cd /opt/nordic/ncs/v2.7.0    # navigate to the Nordic Zephyr workspace topdir'
          echo     '  $ pimp -i @v2.7.0              # init pimp to create @v2.7.0'
          echo     '  $ pimp -z                      # prepare pimping of Zephyr workspace'
