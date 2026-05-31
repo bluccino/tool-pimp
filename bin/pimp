@@ -125,7 +125,7 @@
 #-------------------------------------------------------------------------------
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.3";
+      echo "1.0.4";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -737,7 +737,7 @@
     echo '' >>"$ACTIVATE"
     echo '# custom setup' >>"$ACTIVATE"
     echo 'if [ -f "$VIRTUAL_ENV/bin/setup.sh" ]; then' >>"$ACTIVATE"
-    echo '  source $VIRTUAL_ENV/bin/setup.sh' >>"$ACTIVATE"
+    echo '  source "$VIRTUAL_ENV/bin/setup.sh"' >>"$ACTIVATE"
     echo 'fi' >>"$ACTIVATE"
 
     chmod -w "$ACTIVATE"
@@ -758,7 +758,7 @@ if [ "$1" == '---pimp-cleanup' ] && [ "$2" != "" ] && [ "$3" == "" ]; then
 fi\
     ' "$ACTIVATE.tmp" >"$ACTIVATE"
   sed '/deactivate ()/  a\
-    source $VIRTUAL_ENV/bin/cleanup.sh\
+    source "$VIRTUAL_ENV/bin/cleanup.sh"\
     ' "$ACTIVATE" > "$ACTIVATE.tmp"
   sed '/deactivate ()/  a\
     if [ -f "$VIRTUAL_ENV/bin/cleanup.sh" ]; then\
