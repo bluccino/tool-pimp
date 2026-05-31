@@ -125,7 +125,7 @@
 #-------------------------------------------------------------------------------
 
    if [ "$*" == "--version" ] || [ "$*" == "--v" ]; then
-      echo "1.0.4";
+      echo "1.0.5";
       return 0 2>/dev/null || exit 0  # safe return/exit
    fi
 
@@ -1201,11 +1201,13 @@ fi
       fi
 
       if [ -f "$ROOT/.pimp/init.sh" ]; then
+            # run init.sh with the virtual environment activated, so that
+            # 'python'/'pip' resolve to the venv (subshell keeps parent clean)
          if [ "$*" != "---all-y" ]; then
             pimp ---g "=== post initialize virtual environment (run .pimp/init.sh)"
-            bash "$ROOT/.pimp/init.sh" || exit 1
+            ( source "$ROOT/$VENV/bin/activate" && bash "$ROOT/.pimp/init.sh" ) || exit 1
          else
-            bash "$ROOT/.pimp/init.sh" >/dev/null || exit 1
+            ( source "$ROOT/$VENV/bin/activate" && bash "$ROOT/.pimp/init.sh" ) >/dev/null || exit 1
          fi
       fi
 
